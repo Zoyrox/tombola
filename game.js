@@ -1,167 +1,115 @@
-// Game client logic
+// Gioco Tombola Python
 class TombolaGame {
   constructor() {
-    this.socket = null;
     this.user = null;
     this.gameState = null;
+    this.syncInterval = null;
     this.init();
   }
 
   init() {
-    // Connect to server
-    this.connectToServer();
-    
-    // Setup event listeners
     this.setupEventListeners();
-    
-    // Show login screen
     this.showLoginScreen();
-  }
-
-  connectToServer() {
-    // Connect to Socket.io server
-    this.socket = io();
-    
-    this.socket.on('connect', () => {
-      this.updateConnectionStatus(true);
-      console.log('Connected to server');
-    });
-
-    this.socket.on('disconnect', () => {
-      this.updateConnectionStatus(false);
-      console.log('Disconnected from server');
-    });
-
-    // Game state updates
-    this.socket.on('game-state', (state) => {
-      this.gameState = state;
-      this.updateGameUI();
-    });
-
-    this.socket.on('game-update', (state) => {
-      this.gameState = state;
-      this.updateGameUI();
-    });
-
-    // Number extraction
-    this.socket.on('number-extracted', (data) => {
-      this.gameState = data.gameState;
-      this.showNotification(`Estratto il numero ${data.number}!`, 'success');
-      this.updateGameUI();
-    });
-
-    // Players update
-    this.socket.on('players-update', (players) => {
-      this.gameState.players = players;
-      this.updatePlayersList();
-    });
-
-    // Winner announcement
-    this.socket.on('winner', (player) => {
-      this.showWinnerModal(player);
-    });
-
-    // Login responses
-    this.socket.on('login-success', (data) => {
-      this.user = data.player;
-      this.gameState = data.gameState;
-      this.showGameScreen();
-      this.showNotification(`Benvenuto ${this.user.name}!`, 'success');
-    });
-
-    this.socket.on('admin-login-success', (state) => {
-      this.user = {
-        id: 'admin',
-        name: 'Amministratore',
-        role: 'admin'
-      };
-      this.gameState = state;
-      this.showGameScreen();
-      this.showNotification('Accesso admin effettuato!', 'success');
-    });
-
-    this.socket.on('login-error', (error) => {
-      this.showNotification(error, 'error');
-    });
-
-    // Codes generated
-    this.socket.on('codes-generated', (codes) => {
-      this.showCodesModal(codes);
-    });
+    this.startSync();
   }
 
   setupEventListeners() {
-    // Login buttons
-    document.getElementById('player-login-btn').addEventListener('click', () => {
-      this.loginAsPlayer();
-    });
-
-    document.getElementById('admin-login-btn').addEventListener('click', () => {
-      this.loginAsAdmin();
-    });
-
-    document.getElementById('admin-switch').addEventListener('click', () => {
-      this.showAdminLogin();
-    });
-
-    document.getElementById('player-switch').addEventListener('click', () => {
-      this.showPlayerLogin();
-    });
-
+    // Login
+    document.getElementById('player-login-btn').addEventListener('click', () => this.loginAsPlayer());
+    document.getElementById('admin-login-btn').addEventListener('click', () => this.loginAsAdmin());
+    document.getElementById('admin-switch').addEventListener('click', () => this.showAdminLogin());
+    document.getElementById('player-switch').addEventListener('click', () => this.showPlayerLogin());
+    
     // Game controls
-    document.getElementById('extract-btn').addEventListener('click', () => {
-      this.extractNumber();
-    });
-
-    document.getElementById('auto-btn').addEventListener('click', () => {
-      this.toggleAutoExtract();
-    });
-
-    document.getElementById('new-game-btn').addEventListener('click', () => {
-      this.startNewGame();
-    });
-
-    document.getElementById('manage-codes-btn').addEventListener('click', () => {
-      this.showCodeManager();
-    });
-
-    document.getElementById('generate-codes-btn').addEventListener('click', () => {
-      this.generateCodes();
-    });
-
-    document.getElementById('copy-codes-btn').addEventListener('click', () => {
-      this.copyCodes();
-    });
-
-    document.getElementById('logout-btn').addEventListener('click', () => {
-      this.logout();
-    });
-
+    document.getElementById('extract-btn').addEventListener('click', () => this.extractNumber());
+    document.getElementById('auto-btn').addEventListener('click', () => this.toggleAutoExtract());
+    document.getElementById('new-game-btn').addEventListener('click', () => this.startNewGame());
+    document.getElementById('manage-codes-btn').addEventListener('click', () => this.showCodeManager());
+    document.getElementById('generate-codes-btn').addEventListener('click', () => this.generateCodes());
+    document.getElementById('copy-codes-btn').addEventListener('click', () => this.copyCodes());
+    document.getElementById('logout-btn').addEventListener('click', () => this.logout());
+    
     // Modal buttons
-    document.getElementById('close-winner-modal').addEventListener('click', () => {
-      this.closeModal('winner-modal');
-    });
-
-    document.getElementById('close-codes-modal').addEventListener('click', () => {
-      this.closeModal('codes-modal');
-    });
-
+    document.getElementById('close-winner-modal').addEventListener('click', () => this.closeModal('winner-modal'));
+    document.getElementById('close-codes-modal').addEventListener('click', () => this.closeModal('codes-modal'));
     document.getElementById('new-game-modal-btn').addEventListener('click', () => {
       this.startNewGame();
       this.closeModal('winner-modal');
     });
+    
+    // Tasto invio sui form
+    document.getElementById('player-code').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') this.loginAsPlayer();
+    });
+    
+    document.getElementById('admin-code').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') this.loginAsAdmin();
+    });
+  }
+
+  startSync() {
+    this.syncInterval = setInterval(() => {
+      if (this.user) {
+        this.syncGameState();
+      }
+    }, 2000);
+  }
+
+  syncGameState() {
+    const gameState = window.tombolaServer.getGameState();
+    
+    // Aggiorna solo se ci sono cambiamenti
+    if (JSON.stringify(gameState) !== JSON.stringify(this.gameState)) {
+      this.gameState = gameState;
+      this.updateGameUI();
+      
+      // Controlla vincitori
+      if (this.gameState.winner && !document.getElementById('winner-modal-overlay').style.display === 'flex') {
+        this.showWinnerModal(this.gameState.winner);
+      }
+    }
+    
+    // Aggiorna attività utente
+    if (this.user?.role === 'player') {
+      const player = this.gameState.players.find(p => p.code === this.user.code);
+      if (player) {
+        player.lastActivity = Date.now();
+      }
+    }
   }
 
   loginAsPlayer() {
     const code = document.getElementById('player-code').value.trim().toUpperCase();
-    const name = document.getElementById('player-name').value.trim() || `Giocatore_${Date.now()}`;
+    const name = document.getElementById('player-name').value.trim() || `Giocatore_${Date.now().toString().slice(-4)}`;
     
     if (!code) {
       this.showNotification('Inserisci un codice valido', 'error');
       return;
     }
-
-    this.socket.emit('player-login', { code, name });
+    
+    this.showLoading(true);
+    
+    setTimeout(() => {
+      const result = window.tombolaServer.loginPlayer(code, name);
+      
+      if (result.success) {
+        this.user = {
+          role: 'player',
+          code: code,
+          name: result.player.name,
+          id: result.player.id,
+          cardNumbers: result.player.cardNumbers
+        };
+        
+        this.gameState = result.gameState;
+        this.showGameScreen();
+        this.showNotification(`Benvenuto ${this.user.name}!`, 'success');
+      } else {
+        this.showNotification(result.error, 'error');
+      }
+      
+      this.showLoading(false);
+    }, 500);
   }
 
   loginAsAdmin() {
@@ -171,13 +119,45 @@ class TombolaGame {
       this.showNotification('Inserisci il codice admin', 'error');
       return;
     }
-
-    this.socket.emit('admin-login', { code });
+    
+    this.showLoading(true);
+    
+    setTimeout(() => {
+      const result = window.tombolaServer.loginAdmin(code);
+      
+      if (result.success) {
+        this.user = {
+          role: 'admin',
+          code: code,
+          name: 'Amministratore',
+          id: 'admin'
+        };
+        
+        this.gameState = result.gameState;
+        this.showGameScreen();
+        this.showNotification('Accesso admin effettuato!', 'success');
+      } else {
+        this.showNotification(result.error, 'error');
+      }
+      
+      this.showLoading(false);
+    }, 500);
   }
 
   extractNumber() {
-    if (this.user?.role === 'admin') {
-      this.socket.emit('extract-number');
+    if (this.user?.role !== 'admin') {
+      this.showNotification('Solo l\'amministratore può estrarre numeri', 'error');
+      return;
+    }
+    
+    const result = window.tombolaServer.extractNumber();
+    
+    if (result.success) {
+      this.gameState = result.gameState;
+      this.updateGameUI();
+      this.showNotification(`Estratto il numero ${result.number}!`, 'success');
+    } else {
+      this.showNotification(result.error, 'error');
     }
   }
 
@@ -191,7 +171,7 @@ class TombolaGame {
       this.showNotification('Auto-estrazione disattivata', 'info');
     } else {
       this.autoExtractInterval = setInterval(() => {
-        if (this.user?.role === 'admin' && this.gameState?.extractedNumbers?.length < 90) {
+        if (this.user?.role === 'admin' && this.gameState?.gameActive) {
           this.extractNumber();
         } else {
           this.toggleAutoExtract();
@@ -204,15 +184,37 @@ class TombolaGame {
   }
 
   startNewGame() {
-    this.socket.emit('new-game');
+    this.gameState = window.tombolaServer.startNewGame();
+    
+    // Aggiorna numeri carta per il giocatore corrente
+    if (this.user?.role === 'player') {
+      const player = this.gameState.players.find(p => p.code === this.user.code);
+      if (player) {
+        this.user.cardNumbers = player.cardNumbers;
+      }
+    }
+    
+    this.updateGameUI();
+    this.showNotification('Nuova partita iniziata!', 'success');
   }
 
   generateCodes() {
     const count = parseInt(document.getElementById('codes-count').value) || 5;
-    this.socket.emit('generate-codes', count);
+    const newCodes = window.tombolaServer.generateCodes(count);
+    
+    this.gameState = window.tombolaServer.getGameState();
+    this.showGeneratedCodesModal(newCodes);
+    this.showNotification(`${count} nuovi codici generati!`, 'success');
   }
 
   logout() {
+    if (this.user?.role === 'player') {
+      const player = this.gameState.players.find(p => p.code === this.user.code);
+      if (player) {
+        player.connected = false;
+      }
+    }
+    
     this.user = null;
     this.gameState = null;
     this.showLoginScreen();
@@ -222,6 +224,14 @@ class TombolaGame {
   showLoginScreen() {
     document.querySelector('.login-screen').style.display = 'flex';
     document.querySelector('.game-screen').style.display = 'none';
+    
+    // Reset form
+    document.getElementById('player-code').value = '';
+    document.getElementById('player-name').value = '';
+    document.getElementById('admin-code').value = '';
+    
+    // Mostra login giocatore di default
+    this.showPlayerLogin();
   }
 
   showGameScreen() {
@@ -230,35 +240,45 @@ class TombolaGame {
     this.updateGameUI();
   }
 
+  showAdminLogin() {
+    document.getElementById('player-login').style.display = 'none';
+    document.getElementById('admin-login').style.display = 'block';
+  }
+
+  showPlayerLogin() {
+    document.getElementById('admin-login').style.display = 'none';
+    document.getElementById('player-login').style.display = 'block';
+  }
+
   updateGameUI() {
     if (!this.gameState || !this.user) return;
 
-    // Update user info
+    // Aggiorna info utente
     document.getElementById('user-name').textContent = this.user.name;
     document.getElementById('user-role').textContent = this.user.role === 'admin' ? 'Admin' : 'Giocatore';
     document.getElementById('user-role').className = `user-role role-${this.user.role}`;
 
-    // Update stats
-    document.getElementById('numbers-left').textContent = 90 - (this.gameState.extractedNumbers?.length || 0);
+    // Aggiorna statistiche
+    document.getElementById('numbers-left').textContent = this.gameState.numbersLeft || 90 - (this.gameState.extractedNumbers?.length || 0);
     document.getElementById('extracted-count').textContent = this.gameState.extractedNumbers?.length || 0;
-    document.getElementById('players-count').textContent = this.gameState.players?.filter(p => p.connected).length || 0;
+    document.getElementById('players-count').textContent = this.gameState.players?.length || 0;
     document.getElementById('current-turn').textContent = this.getCurrentTurn();
 
-    // Update number display
+    // Aggiorna display numero
     this.updateNumberDisplay();
 
-    // Update extracted numbers
+    // Aggiorna numeri estratti
     this.updateExtractedNumbers();
 
-    // Update players list
+    // Aggiorna lista giocatori
     this.updatePlayersList();
 
-    // Update tombola card (for players)
+    // Aggiorna cartella tombola (per giocatori)
     if (this.user.role === 'player') {
       this.updateTombolaCard();
     }
 
-    // Show/hide admin controls
+    // Mostra/nascondi controlli admin
     if (this.user.role === 'admin') {
       document.getElementById('admin-controls').style.display = 'block';
       document.getElementById('player-message').style.display = 'none';
@@ -269,7 +289,6 @@ class TombolaGame {
   }
 
   updateNumberDisplay() {
-    const display = document.getElementById('number-display');
     const noNumber = document.getElementById('no-number');
     const currentNumber = document.getElementById('current-number');
     
@@ -305,17 +324,17 @@ class TombolaGame {
     const container = document.getElementById('players-list');
     container.innerHTML = '';
     
-    const players = this.gameState.players?.filter(p => p.connected) || [];
+    const players = this.gameState.players || [];
     
     if (players.length === 0) {
-      container.innerHTML = '<div class="empty-state">Nessun giocatore online</div>';
+      container.innerHTML = '<div style="color: var(--text-secondary); text-align: center; padding: 20px;">Nessun giocatore online</div>';
       return;
     }
     
     players.forEach(player => {
       const card = document.createElement('div');
       card.className = 'player-card';
-      if (this.user?.id === player.id) {
+      if (this.user?.role === 'player' && this.user.code === player.code) {
         card.classList.add('active');
       }
       if (player.hasWon) {
@@ -341,26 +360,22 @@ class TombolaGame {
   }
 
   updateTombolaCard() {
-    const player = this.gameState.players?.find(p => p.id === this.user?.id);
-    if (!player?.cardNumbers) return;
-    
     const container = document.getElementById('tombola-grid');
     container.innerHTML = '';
     
-    const numbers = player.cardNumbers;
+    if (!this.user?.cardNumbers) return;
+    
+    const numbers = this.user.cardNumbers;
     const extracted = this.gameState.extractedNumbers || [];
     
-    // Create 27 cells (3 rows × 9 columns)
     for (let i = 0; i < 27; i++) {
       const cell = document.createElement('div');
       const row = Math.floor(i / 9);
       const col = i % 9;
       
-      // Number range for this column
       const minNum = col * 10 + 1;
       const maxNum = col * 10 + 10;
       
-      // Player's numbers in this column
       const colNumbers = numbers.filter(n => n >= minNum && n <= maxNum).sort((a, b) => a - b);
       
       if (row < colNumbers.length) {
@@ -389,21 +404,11 @@ class TombolaGame {
   }
 
   getCurrentTurn() {
-    const players = this.gameState.players?.filter(p => p.connected) || [];
+    const players = this.gameState.players || [];
     if (players.length === 0) return '-';
     
     const extractedCount = this.gameState.extractedNumbers?.length || 0;
     return players[extractedCount % players.length]?.name || '-';
-  }
-
-  showAdminLogin() {
-    document.getElementById('player-login').style.display = 'none';
-    document.getElementById('admin-login').style.display = 'block';
-  }
-
-  showPlayerLogin() {
-    document.getElementById('admin-login').style.display = 'none';
-    document.getElementById('player-login').style.display = 'block';
   }
 
   showCodeManager() {
@@ -420,10 +425,29 @@ class TombolaGame {
     codes.forEach(code => {
       const item = document.createElement('div');
       item.className = 'code-item';
+      item.style.cssText = `
+        padding: 10px;
+        margin-bottom: 8px;
+        background: rgba(255, 255, 255, 0.03);
+        border-radius: 6px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      `;
       
       item.innerHTML = `
-        <div class="code-value">${code.code}</div>
-        <div class="code-status ${code.used ? 'status-used' : 'status-available'}">
+        <div>
+          <strong style="font-family: monospace;">${code.code}</strong>
+          ${code.playerName ? `<div style="font-size: 12px; color: var(--text-secondary);">${code.playerName}</div>` : ''}
+        </div>
+        <div style="
+          background: ${code.used ? 'rgba(239, 68, 68, 0.2)' : 'rgba(16, 185, 129, 0.2)'};
+          color: ${code.used ? 'var(--danger)' : 'var(--success)'};
+          padding: 4px 8px;
+          border-radius: 4px;
+          font-size: 12px;
+          font-weight: 600;
+        ">
           ${code.used ? 'Usato' : 'Disponibile'}
         </div>
       `;
@@ -432,21 +456,26 @@ class TombolaGame {
     });
   }
 
-  showCodesModal(codes) {
+  showGeneratedCodesModal(codes) {
     const container = document.getElementById('generated-codes');
+    if (!container) return;
+    
     container.innerHTML = '';
     
     codes.forEach(code => {
       const item = document.createElement('div');
-      item.className = 'code-item';
-      item.innerHTML = `
-        <div class="code-value">${code.code}</div>
-        <div class="code-status status-available">Disponibile</div>
+      item.style.cssText = `
+        padding: 8px;
+        margin-bottom: 6px;
+        background: rgba(255, 255, 255, 0.03);
+        border-radius: 4px;
+        font-family: monospace;
       `;
+      item.textContent = code.code;
       container.appendChild(item);
     });
     
-    this.showModal('codes-modal');
+    this.showModal('generated-codes-modal');
   }
 
   copyCodes() {
@@ -459,6 +488,8 @@ class TombolaGame {
       navigator.clipboard.writeText(codes)
         .then(() => this.showNotification('Codici copiati negli appunti!', 'success'))
         .catch(() => this.showNotification('Errore nella copia', 'error'));
+    } else {
+      this.showNotification('Nessun codice disponibile', 'info');
     }
   }
 
@@ -468,16 +499,45 @@ class TombolaGame {
   }
 
   showModal(modalId) {
-    document.getElementById(`${modalId}-overlay`).style.display = 'flex';
+    const modal = document.getElementById(`${modalId}-overlay`);
+    if (modal) {
+      modal.style.display = 'flex';
+    }
   }
 
   closeModal(modalId) {
-    document.getElementById(`${modalId}-overlay`).style.display = 'none';
+    const modal = document.getElementById(`${modalId}-overlay`);
+    if (modal) {
+      modal.style.display = 'none';
+    }
   }
 
   showNotification(message, type = 'info') {
+    // Rimuovi notifiche precedenti
+    const oldNotifications = document.querySelectorAll('.notification');
+    oldNotifications.forEach(n => n.remove());
+    
+    // Crea nuova notifica
     const notification = document.createElement('div');
     notification.className = 'notification';
+    notification.style.cssText = `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: ${type === 'success' ? 'var(--success)' : 
+                  type === 'error' ? 'var(--danger)' : 
+                  type === 'warning' ? 'var(--warning)' : 'var(--primary)'};
+      color: white;
+      padding: 12px 20px;
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      z-index: 3000;
+      animation: slideIn 0.3s ease;
+    `;
+    
     notification.innerHTML = `
       <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
       <span>${message}</span>
@@ -487,26 +547,37 @@ class TombolaGame {
     
     setTimeout(() => {
       if (notification.parentNode) {
-        notification.parentNode.removeChild(notification);
+        notification.style.animation = 'slideOut 0.3s ease';
+        setTimeout(() => {
+          notification.parentNode.removeChild(notification);
+        }, 300);
       }
     }, 3000);
+    
+    // Aggiungi animazioni CSS se non esistono
+    if (!document.querySelector('#notification-animations')) {
+      const style = document.createElement('style');
+      style.id = 'notification-animations';
+      style.textContent = `
+        @keyframes slideIn {
+          from { transform: translateX(100%); opacity: 0; }
+          to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes slideOut {
+          from { transform: translateX(0); opacity: 1; }
+          to { transform: translateX(100%); opacity: 0; }
+        }
+      `;
+      document.head.appendChild(style);
+    }
   }
 
-  updateConnectionStatus(connected) {
-    const dot = document.getElementById('connection-dot');
-    const text = document.getElementById('connection-text');
-    
-    if (connected) {
-      dot.className = 'connection-dot online';
-      text.textContent = 'Connesso';
-    } else {
-      dot.className = 'connection-dot offline';
-      text.textContent = 'Disconnesso';
-    }
+  showLoading(show) {
+    document.getElementById('loading').style.display = show ? 'block' : 'none';
   }
 }
 
-// Initialize game when page loads
-window.addEventListener('DOMContentLoaded', () => {
-  window.game = new TombolaGame();
+// Inizializza il gioco quando la pagina è pronta
+document.addEventListener('DOMContentLoaded', () => {
+  window.tombolaGame = new TombolaGame();
 });
