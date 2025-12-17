@@ -1,13 +1,13 @@
 {
   "name": "tombola-python",
   "version": "1.0.0",
-  "description": "Tombola online con tema Python",
-  "main": "index.html",
+  "description": "Tombola multiplayer in tempo reale",
+  "main": "server.js",
   "scripts": {
-    "build": "echo 'Build completato per Tombola Python'",
-    "start": "echo 'Static site - nessun server necessario'"
+    "start": "node server.js"
   },
-  "keywords": ["tombola", "python", "game", "online"],
-  "author": "",
-  "license": "MIT"
+  "dependencies": {
+    "express": "^4.18.2",
+    "socket.io": "^4.7.2"
+  }
 }
