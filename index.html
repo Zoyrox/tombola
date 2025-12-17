@@ -1,0 +1,1914 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tombola Python - Sistema Login</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #306998;
+            --secondary: #FFD43B;
+            --accent: #4B8BBE;
+            --light-bg: #1e1e1e;
+            --dark-bg: #121212;
+            --card-bg: #252526;
+            --text: #f5f5f5;
+            --text-secondary: #cccccc;
+            --success: #4CAF50;
+            --warning: #FF9800;
+            --danger: #f44336;
+            --border-radius: 8px;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--dark-bg);
+            color: var(--text);
+            line-height: 1.6;
+            padding: 20px;
+            background-image: radial-gradient(circle at 15% 50%, rgba(48, 105, 152, 0.1) 0%, transparent 20%),
+                            radial-gradient(circle at 85% 30%, rgba(255, 212, 59, 0.1) 0%, transparent 20%);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        /* Login Screen */
+        .login-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 80vh;
+        }
+
+        .login-box {
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 40px;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: var(--shadow);
+            border-top: 5px solid var(--primary);
+        }
+
+        .login-title {
+            font-family: 'Source Code Pro', monospace;
+            color: var(--secondary);
+            font-size: 2rem;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .login-subtitle {
+            text-align: center;
+            color: var(--text-secondary);
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 15px;
+            background-color: #333;
+            border: 2px solid #444;
+            border-radius: var(--border-radius);
+            color: var(--text);
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .input-with-icon {
+            position: relative;
+        }
+
+        .input-with-icon i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+        }
+
+        .input-with-icon input {
+            padding-left: 45px;
+        }
+
+        /* Game Screen (Hidden by default) */
+        .game-screen {
+            display: none;
+        }
+
+        header {
+            text-align: center;
+            padding: 20px;
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            border-left: 5px solid var(--primary);
+            border-right: 5px solid var(--secondary);
+        }
+
+        h1 {
+            font-family: 'Source Code Pro', monospace;
+            color: var(--secondary);
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        h1 span {
+            color: var(--primary);
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            margin-bottom: 15px;
+        }
+
+        .python-logo {
+            color: var(--secondary);
+            font-size: 2rem;
+        }
+
+        .game-area {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 25px;
+        }
+
+        @media (max-width: 992px) {
+            .game-area {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 25px;
+            box-shadow: var(--shadow);
+        }
+
+        .card-title {
+            font-family: 'Source Code Pro', monospace;
+            color: var(--secondary);
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-title i {
+            color: var(--accent);
+        }
+
+        /* Tombola Number Section */
+        .number-display {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 300px;
+            background-color: rgba(30, 30, 30, 0.8);
+            border-radius: var(--border-radius);
+            margin-bottom: 20px;
+            border: 2px dashed var(--accent);
+        }
+
+        .number-display.empty {
+            justify-content: center;
+        }
+
+        .extracted-number {
+            font-size: 10rem;
+            font-weight: 700;
+            color: var(--secondary);
+            text-shadow: 0 0 20px rgba(255, 212, 59, 0.5);
+            line-height: 1;
+            font-family: 'Source Code Pro', monospace;
+        }
+
+        .number-label {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            margin-top: 10px;
+        }
+
+        .control-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: var(--border-radius);
+            font-family: 'Source Code Pro', monospace;
+            font-weight: 600;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--accent);
+            transform: translateY(-3px);
+        }
+
+        .btn-secondary {
+            background-color: #555;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #666;
+            transform: translateY(-3px);
+        }
+
+        .btn-success {
+            background-color: var(--success);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: #45a049;
+            transform: translateY(-3px);
+        }
+
+        .btn-warning {
+            background-color: var(--warning);
+            color: white;
+        }
+
+        .btn-warning:hover {
+            background-color: #e68a00;
+            transform: translateY(-3px);
+        }
+
+        .btn-danger {
+            background-color: var(--danger);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #d32f2f;
+            transform: translateY(-3px);
+        }
+
+        .btn:disabled {
+            background-color: #555;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Admin Panel */
+        .admin-panel {
+            background-color: rgba(30, 30, 30, 0.8);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            margin-top: 20px;
+            border: 2px solid var(--warning);
+        }
+
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .admin-title {
+            font-family: 'Source Code Pro', monospace;
+            color: var(--warning);
+            font-size: 1.3rem;
+        }
+
+        .admin-controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .code-list {
+            background-color: #333;
+            border-radius: var(--border-radius);
+            padding: 15px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .code-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #444;
+        }
+
+        .code-item:last-child {
+            border-bottom: none;
+        }
+
+        .code-value {
+            font-family: 'Source Code Pro', monospace;
+            background-color: #222;
+            padding: 5px 10px;
+            border-radius: 4px;
+        }
+
+        .code-status {
+            font-size: 0.9rem;
+            padding: 3px 8px;
+            border-radius: 4px;
+        }
+
+        .status-used {
+            background-color: var(--danger);
+            color: white;
+        }
+
+        .status-unused {
+            background-color: var(--success);
+            color: white;
+        }
+
+        /* Extracted Numbers */
+        .extracted-numbers {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+            min-height: 60px;
+            padding: 15px;
+            background-color: rgba(30, 30, 30, 0.5);
+            border-radius: var(--border-radius);
+        }
+
+        .extracted-num {
+            width: 45px;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--primary);
+            color: white;
+            border-radius: 50%;
+            font-weight: 600;
+            font-size: 1.2rem;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+            transition: all 0.2s ease;
+        }
+
+        .extracted-num:hover {
+            transform: scale(1.1);
+            background-color: var(--accent);
+        }
+
+        .extracted-num.recent {
+            background-color: var(--secondary);
+            color: #333;
+            animation: pulse 1s;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
+        /* Tombola Card */
+        .tombola-card {
+            display: grid;
+            grid-template-columns: repeat(9, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: 8px;
+            margin-top: 20px;
+        }
+
+        .number-cell {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #333;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 1.3rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 2px solid transparent;
+            user-select: none;
+        }
+
+        .number-cell:hover {
+            background-color: #444;
+        }
+
+        .number-cell.extracted {
+            background-color: var(--primary);
+            color: white;
+            transform: scale(0.95);
+        }
+
+        .number-cell.recent {
+            background-color: var(--secondary);
+            color: #333;
+            border-color: var(--secondary);
+            animation: highlight 1.5s;
+        }
+
+        @keyframes highlight {
+            0% { box-shadow: 0 0 0 0 rgba(255, 212, 59, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(255, 212, 59, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 212, 59, 0); }
+        }
+
+        .number-cell.empty {
+            background-color: transparent;
+            cursor: default;
+        }
+
+        .number-cell.empty:hover {
+            background-color: transparent;
+        }
+
+        /* Players */
+        .players-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .player-card {
+            background-color: #333;
+            padding: 15px;
+            border-radius: var(--border-radius);
+            transition: all 0.3s ease;
+            border-left: 4px solid var(--primary);
+        }
+
+        .player-card.active {
+            border-left-color: var(--secondary);
+            background-color: #3a3a3a;
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .player-card.winner {
+            border-left-color: var(--success);
+            background-color: rgba(76, 175, 80, 0.1);
+        }
+
+        .player-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .player-name {
+            font-weight: 600;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .player-card-count {
+            background-color: var(--accent);
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .player-numbers {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-top: 10px;
+        }
+
+        .player-num {
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #444;
+            color: #ddd;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+
+        .player-num.extracted {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        /* Game Status */
+        .game-status {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 15px 25px;
+            margin-top: 10px;
+            box-shadow: var(--shadow);
+        }
+
+        .status-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .status-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--secondary);
+            font-family: 'Source Code Pro', monospace;
+        }
+
+        .status-label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* User Info */
+        .user-info {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background-color: var(--card-bg);
+            padding: 10px 15px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+        }
+
+        .user-role {
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .role-admin {
+            background-color: var(--warning);
+            color: #333;
+        }
+
+        .role-player {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .logout-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: color 0.3s;
+        }
+
+        .logout-btn:hover {
+            color: var(--danger);
+        }
+
+        /* Instructions */
+        .instructions {
+            margin-top: 30px;
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            box-shadow: var(--shadow);
+        }
+
+        .instructions h3 {
+            color: var(--secondary);
+            margin-bottom: 15px;
+            font-family: 'Source Code Pro', monospace;
+        }
+
+        .instructions ul {
+            padding-left: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 10px;
+        }
+
+        .instructions li {
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+        }
+
+        .instructions code {
+            background-color: #333;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Source Code Pro', monospace;
+            color: var(--secondary);
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: var(--card-bg);
+            width: 90%;
+            max-width: 500px;
+            border-radius: var(--border-radius);
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            border-top: 5px solid var(--secondary);
+        }
+
+        .modal-title {
+            color: var(--secondary);
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+            font-family: 'Source Code Pro', monospace;
+        }
+
+        .modal-text {
+            margin-bottom: 25px;
+            line-height: 1.7;
+        }
+
+        .modal-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .extracted-number {
+                font-size: 6rem;
+            }
+            
+            .btn {
+                padding: 10px 20px;
+                font-size: 1rem;
+            }
+            
+            .game-status {
+                flex-direction: column;
+                gap: 15px;
+                align-items: flex-start;
+            }
+            
+            .status-item {
+                flex-direction: row;
+                gap: 10px;
+                align-items: center;
+            }
+            
+            .status-value {
+                font-size: 1.5rem;
+            }
+            
+            .user-info {
+                position: relative;
+                top: 0;
+                right: 0;
+                margin-bottom: 20px;
+                justify-content: space-between;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Screen -->
+    <div class="container login-container" id="login-screen">
+        <div class="login-box">
+            <h1 class="login-title"><i class="fab fa-python python-logo"></i> Tombola <span>Python</span></h1>
+            <p class="login-subtitle">Accedi con il tuo codice univoco per partecipare al gioco</p>
+            
+            <form id="login-form">
+                <div class="form-group">
+                    <label class="form-label">Codice di accesso</label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-key"></i>
+                        <input type="password" class="form-input" id="login-code" placeholder="Inserisci il tuo codice" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Nome giocatore (opzionale)</label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-user"></i>
+                        <input type="text" class="form-input" id="player-name" placeholder="Come vuoi essere chiamato">
+                    </div>
+                </div>
+                
+                <div class="form-group" style="margin-top: 30px;">
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">
+                        <i class="fas fa-sign-in-alt"></i> Accedi al Gioco
+                    </button>
+                </div>
+                
+                <div style="text-align: center; margin-top: 20px; color: var(--text-secondary);">
+                    <p>Sei l'amministratore? <a href="#" id="admin-login-link" style="color: var(--warning);">Accedi come admin</a></p>
+                </div>
+            </form>
+            
+            <!-- Admin Login (Hidden by default) -->
+            <div id="admin-login-section" style="display: none; margin-top: 30px;">
+                <h3 style="color: var(--warning); margin-bottom: 15px; font-family: 'Source Code Pro', monospace;">
+                    <i class="fas fa-user-shield"></i> Accesso Admin
+                </h3>
+                
+                <form id="admin-login-form">
+                    <div class="form-group">
+                        <label class="form-label">Codice Admin</label>
+                        <div class="input-with-icon">
+                            <i class="fas fa-lock"></i>
+                            <input type="password" class="form-input" id="admin-code" placeholder="Codice admin segreto" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-warning" style="width: 100%;">
+                            <i class="fas fa-user-cog"></i> Accedi come Admin
+                        </button>
+                    </div>
+                    
+                    <div style="text-align: center; margin-top: 15px;">
+                        <a href="#" id="back-to-player-login" style="color: var(--accent);">Torna al login giocatore</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Game Screen -->
+    <div class="container game-screen" id="game-screen">
+        <!-- User Info -->
+        <div class="user-info" id="user-info">
+            <div>
+                <div id="user-display-name">Giocatore</div>
+                <div class="user-role" id="user-role">Giocatore</div>
+            </div>
+            <button class="logout-btn" id="logout-btn" title="Esci">
+                <i class="fas fa-sign-out-alt"></i>
+            </button>
+        </div>
+        
+        <header>
+            <h1><i class="fab fa-python python-logo"></i> Tombola <span>Python</span></h1>
+            <p class="subtitle" id="game-subtitle">Benvenuto nella tombola online con tema Python!</p>
+            <div class="game-status">
+                <div class="status-item">
+                    <div class="status-value" id="remaining-numbers">90</div>
+                    <div class="status-label">Numeri rimanenti</div>
+                </div>
+                <div class="status-item">
+                    <div class="status-value" id="extracted-count">0</div>
+                    <div class="status-label">Numeri estratti</div>
+                </div>
+                <div class="status-item">
+                    <div class="status-value" id="players-count">0</div>
+                    <div class="status-label">Giocatori online</div>
+                </div>
+                <div class="status-item">
+                    <div class="status-value" id="current-player">-</div>
+                    <div class="status-label">Turno giocatore</div>
+                </div>
+            </div>
+        </header>
+
+        <div class="game-area">
+            <div class="card">
+                <h2 class="card-title"><i class="fas fa-dice"></i> Estrazione Numeri</h2>
+                
+                <div class="number-display empty" id="number-display">
+                    <div class="number-label">Nessun numero estratto</div>
+                </div>
+                
+                <!-- Admin Controls (Visible only to admin) -->
+                <div class="admin-panel" id="admin-controls" style="display: none;">
+                    <div class="admin-header">
+                        <div class="admin-title"><i class="fas fa-user-cog"></i> Pannello Amministratore</div>
+                        <button class="btn btn-secondary btn-sm" id="toggle-codes-btn">
+                            <i class="fas fa-key"></i> Gestisci Codici
+                        </button>
+                    </div>
+                    
+                    <div class="control-buttons">
+                        <button class="btn btn-primary" id="extract-btn">
+                            <i class="fas fa-play"></i> Estrai Numero
+                        </button>
+                        <button class="btn btn-secondary" id="reset-btn">
+                            <i class="fas fa-redo"></i> Reset Gioco
+                        </button>
+                        <button class="btn btn-success" id="auto-btn">
+                            <i class="fas fa-robot"></i> Auto Estr.
+                        </button>
+                    </div>
+                    
+                    <!-- Code Management (Hidden by default) -->
+                    <div id="code-management" style="display: none; margin-top: 20px;">
+                        <h3 style="color: var(--warning); margin-bottom: 15px; font-size: 1.2rem;">
+                            <i class="fas fa-key"></i> Gestione Codici Accesso
+                        </h3>
+                        
+                        <div class="admin-controls">
+                            <div>
+                                <label class="form-label">Numero di codici da generare</label>
+                                <input type="number" class="form-input" id="num-codes" min="1" max="50" value="5">
+                            </div>
+                            <div>
+                                <label class="form-label">&nbsp;</label>
+                                <button class="btn btn-warning" id="generate-codes-btn" style="width: 100%;">
+                                    <i class="fas fa-plus-circle"></i> Genera Codici
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="code-list" id="code-list">
+                            <!-- Generated codes will appear here -->
+                            <div style="text-align: center; padding: 20px; color: var(--text-secondary);">
+                                <i class="fas fa-key" style="font-size: 2rem; margin-bottom: 10px; display: block;"></i>
+                                <p>Nessun codice generato. Genera nuovi codici per i giocatori.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Player Controls (Visible only to players) -->
+                <div class="control-buttons" id="player-controls">
+                    <button class="btn btn-primary" id="player-extract-btn" disabled>
+                        <i class="fas fa-play"></i> Estrai Numero
+                    </button>
+                    <p style="text-align: center; margin-top: 10px; color: var(--text-secondary); font-size: 0.9rem;">
+                        Solo l'amministratore può estrarre i numeri
+                    </p>
+                </div>
+                
+                <h3 class="card-title" style="margin-top: 30px; font-size: 1.2rem;">
+                    <i class="fas fa-history"></i> Numeri Estratti
+                </h3>
+                <div class="extracted-numbers" id="extracted-numbers">
+                    <!-- I numeri estratti appariranno qui -->
+                </div>
+            </div>
+            
+            <div class="card">
+                <h2 class="card-title"><i class="fas fa-table"></i> La tua Cartella</h2>
+                <p style="margin-bottom: 15px; color: var(--text-secondary);" id="player-info-text">
+                    Clicca sui numeri estratti per segnarli sulla tua cartella
+                </p>
+                
+                <div class="tombola-card" id="tombola-card">
+                    <!-- La cartella della tombola sarà generata qui -->
+                </div>
+                
+                <div style="margin-top: 25px;">
+                    <h3 class="card-title" style="font-size: 1.2rem;">
+                        <i class="fas fa-users"></i> Giocatori Online
+                    </h3>
+                    <div class="players-container" id="players-container">
+                        <!-- I giocatori saranno generati qui -->
+                        <div style="text-align: center; padding: 30px; color: var(--text-secondary);">
+                            <i class="fas fa-users" style="font-size: 2rem; margin-bottom: 15px; display: block;"></i>
+                            <p>Nessun giocatore online. Attendi che altri giocatori si uniscano.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="instructions">
+            <h3><i class="fas fa-info-circle"></i> Come funziona la Tombola Python</h3>
+            <ul>
+                <li>L'amministratore genera codici univoci per i giocatori</li>
+                <li>Ogni giocatore accede con il proprio codice</li>
+                <li>La tombola contiene 90 numeri (da 1 a 90) come nel gioco tradizionale</li>
+                <li>Ogni giocatore ha una cartella con 15 numeri univoci</li>
+                <li>Solo l'amministratore può estrarre i numeri</li>
+                <li>Quando viene estratto un numero, tutti i giocatori che lo hanno sulla cartella lo segnano</li>
+                <li>Il primo giocatore che completa una riga, una colonna o tutta la cartella vince</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Modal per il vincitore -->
+    <div class="modal" id="winner-modal">
+        <div class="modal-content">
+            <h2 class="modal-title"><i class="fas fa-trophy"></i> Tombola!</h2>
+            <p class="modal-text" id="winner-text">Un giocatore ha completato la cartella e ha vinto la partita!</p>
+            <div class="modal-buttons">
+                <button class="btn btn-secondary" id="close-modal-btn">Continua a giocare</button>
+                <button class="btn btn-primary" id="new-game-btn">Nuova Partita</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal per i codici generati -->
+    <div class="modal" id="codes-modal">
+        <div class="modal-content">
+            <h2 class="modal-title"><i class="fas fa-key"></i> Codici Generati</h2>
+            <p class="modal-text">Ecco i codici di accesso per i giocatori. Condividili con loro:</p>
+            <div id="generated-codes-list" style="background-color: #333; padding: 15px; border-radius: var(--border-radius); margin-bottom: 20px; max-height: 300px; overflow-y: auto;">
+                <!-- Generated codes will appear here -->
+            </div>
+            <div class="modal-buttons">
+                <button class="btn btn-secondary" id="close-codes-modal-btn">Chiudi</button>
+                <button class="btn btn-primary" id="copy-codes-btn">
+                    <i class="fas fa-copy"></i> Copia Codici
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // VARIABILI GLOBALI E CONFIGURAZIONE
+        // ============================================
+        
+        // Configurazione del gioco
+        const CONFIG = {
+            ADMIN_CODE: "PYTHON2024", // Codice segreto admin (cambialo in produzione!)
+            MAX_PLAYERS: 20,
+            SESSION_TIMEOUT: 60 * 60 * 1000, // 1 ora in millisecondi
+            STORAGE_KEY: "tombola_python_data"
+        };
+        
+        // Stato del gioco
+        let gameState = {
+            extractedNumbers: [],
+            remainingNumbers: Array.from({length: 90}, (_, i) => i + 1),
+            gameActive: false,
+            autoExtractInterval: null,
+            players: [],
+            currentPlayerIndex: 0,
+            adminConnected: false
+        };
+        
+        // Stato dell'utente corrente
+        let currentUser = {
+            isLoggedIn: false,
+            role: null, // "admin" o "player"
+            code: null,
+            name: null,
+            playerId: null
+        };
+        
+        // Database locale per codici e giocatori
+        let gameDatabase = {
+            generatedCodes: [],
+            activePlayers: [],
+            gameHistory: []
+        };
+        
+        // Carica i dati dal localStorage
+        function loadFromStorage() {
+            const savedData = localStorage.getItem(CONFIG.STORAGE_KEY);
+            if (savedData) {
+                try {
+                    const parsedData = JSON.parse(savedData);
+                    gameDatabase = parsedData.gameDatabase || gameDatabase;
+                    gameState = parsedData.gameState || gameState;
+                    
+                    // Ripristina lo stato del gioco se c'era una partita attiva
+                    if (gameState.gameActive) {
+                        updateNumberDisplay(null);
+                        updateExtractedNumbersDisplay();
+                        updateGameStatus();
+                        updatePlayersDisplay();
+                    }
+                } catch (e) {
+                    console.error("Errore nel caricamento dei dati:", e);
+                }
+            }
+        }
+        
+        // Salva i dati nel localStorage
+        function saveToStorage() {
+            const dataToSave = {
+                gameDatabase,
+                gameState
+            };
+            localStorage.setItem(CONFIG.STORAGE_KEY, JSON.stringify(dataToSave));
+        }
+        
+        // Inizializza il gioco
+        function initGame() {
+            loadFromStorage();
+            
+            // Se non ci sono codici generati, creane alcuni di esempio
+            if (gameDatabase.generatedCodes.length === 0) {
+                generateSampleCodes();
+            }
+            
+            updateUIForLogin();
+        }
+        
+        // ============================================
+        // SISTEMA DI LOGIN E AUTENTICAZIONE
+        // ============================================
+        
+        // Genera codici di esempio per test
+        function generateSampleCodes() {
+            const sampleCodes = [
+                { code: "PLAYER001", used: false, playerName: "" },
+                { code: "PLAYER002", used: false, playerName: "" },
+                { code: "PLAYER003", used: false, playerName: "" },
+                { code: "PLAYER004", used: false, playerName: "" },
+                { code: "PLAYER005", used: false, playerName: "" }
+            ];
+            
+            gameDatabase.generatedCodes = sampleCodes;
+            saveToStorage();
+        }
+        
+        // Genera nuovi codici di accesso
+        function generateAccessCodes(count) {
+            const newCodes = [];
+            
+            for (let i = 0; i < count; i++) {
+                // Genera un codice casuale di 8 caratteri
+                const code = "PLAYER" + Math.random().toString(36).substring(2, 10).toUpperCase();
+                
+                newCodes.push({
+                    code: code,
+                    used: false,
+                    playerName: "",
+                    generatedAt: new Date().toISOString()
+                });
+            }
+            
+            // Aggiungi i nuovi codici a quelli esistenti
+            gameDatabase.generatedCodes = [...gameDatabase.generatedCodes, ...newCodes];
+            saveToStorage();
+            
+            return newCodes;
+        }
+        
+        // Verifica il codice di accesso
+        function verifyAccessCode(code, isAdminLogin = false) {
+            if (isAdminLogin) {
+                return code === CONFIG.ADMIN_CODE;
+            } else {
+                // Cerca il codice tra quelli generati
+                const codeEntry = gameDatabase.generatedCodes.find(entry => entry.code === code);
+                
+                if (!codeEntry) {
+                    return false; // Codice non trovato
+                }
+                
+                if (codeEntry.used) {
+                    // Controlla se il giocatore è già online
+                    const playerAlreadyOnline = gameState.players.find(player => player.code === code);
+                    return playerAlreadyOnline ? true : false;
+                }
+                
+                return true; // Codice valido e non usato
+            }
+        }
+        
+        // Effettua il login
+        function loginUser(code, playerName = "", isAdmin = false) {
+            if (isAdmin) {
+                currentUser = {
+                    isLoggedIn: true,
+                    role: "admin",
+                    code: code,
+                    name: playerName || "Amministratore",
+                    playerId: "admin"
+                };
+                
+                gameState.adminConnected = true;
+            } else {
+                // Trova il codice nel database
+                const codeEntry = gameDatabase.generatedCodes.find(entry => entry.code === code);
+                
+                if (!codeEntry) {
+                    return false;
+                }
+                
+                // Se il codice non è stato usato, segnalo come usato
+                if (!codeEntry.used) {
+                    codeEntry.used = true;
+                    codeEntry.playerName = playerName || `Giocatore ${gameDatabase.activePlayers.length + 1}`;
+                    codeEntry.usedAt = new Date().toISOString();
+                }
+                
+                // Crea un ID univoco per il giocatore
+                const playerId = `player_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+                
+                currentUser = {
+                    isLoggedIn: true,
+                    role: "player",
+                    code: code,
+                    name: codeEntry.playerName,
+                    playerId: playerId
+                };
+                
+                // Aggiungi il giocatore alla lista attiva se non esiste già
+                const existingPlayerIndex = gameState.players.findIndex(p => p.code === code);
+                
+                if (existingPlayerIndex === -1) {
+                    // Crea una nuova cartella per il giocatore
+                    const playerNumbers = generateRandomNumbers(15, 1, 90);
+                    
+                    const newPlayer = {
+                        id: playerId,
+                        code: code,
+                        name: codeEntry.playerName,
+                        numbers: playerNumbers,
+                        extractedCount: 0,
+                        isActive: gameState.players.length === 0, // Il primo giocatore è attivo
+                        hasWon: false,
+                        joinedAt: new Date().toISOString()
+                    };
+                    
+                    gameState.players.push(newPlayer);
+                } else {
+                    // Il giocatore esiste già (riconnessione)
+                    gameState.players[existingPlayerIndex].isActive = true;
+                }
+                
+                // Aggiungi alla lista dei giocatori attivi nel database
+                const activePlayerEntry = {
+                    playerId: playerId,
+                    code: code,
+                    name: codeEntry.playerName,
+                    lastActive: new Date().toISOString()
+                };
+                
+                gameDatabase.activePlayers.push(activePlayerEntry);
+            }
+            
+            saveToStorage();
+            updateUIForGame();
+            return true;
+        }
+        
+        // Effettua il logout
+        function logoutUser() {
+            if (currentUser.role === "player") {
+                // Rimuovi il giocatore dalla lista attiva
+                const playerIndex = gameState.players.findIndex(p => p.code === currentUser.code);
+                if (playerIndex !== -1) {
+                    gameState.players[playerIndex].isActive = false;
+                }
+                
+                // Rimuovi dal database dei giocatori attivi
+                gameDatabase.activePlayers = gameDatabase.activePlayers.filter(p => p.code !== currentUser.code);
+            } else if (currentUser.role === "admin") {
+                gameState.adminConnected = false;
+                
+                // Ferma l'auto-estrazione se attiva
+                if (gameState.autoExtractInterval) {
+                    clearInterval(gameState.autoExtractInterval);
+                    gameState.autoExtractInterval = null;
+                }
+            }
+            
+            // Resetta l'utente corrente
+            currentUser = {
+                isLoggedIn: false,
+                role: null,
+                code: null,
+                name: null,
+                playerId: null
+            };
+            
+            saveToStorage();
+            updateUIForLogin();
+        }
+        
+        // ============================================
+        // LOGICA DEL GIOCO
+        // ============================================
+        
+        // Genera numeri casuali unici
+        function generateRandomNumbers(count, min, max) {
+            const numbers = new Set();
+            while (numbers.size < count) {
+                numbers.add(Math.floor(Math.random() * (max - min + 1)) + min);
+            }
+            return Array.from(numbers).sort((a, b) => a - b);
+        }
+        
+        // Crea la cartella della tombola per il giocatore corrente
+        function createTombolaCard() {
+            const tombolaCard = document.getElementById('tombola-card');
+            tombolaCard.innerHTML = '';
+            
+            // Trova il giocatore corrente
+            const currentPlayer = gameState.players.find(p => p.code === currentUser.code);
+            if (!currentPlayer) return;
+            
+            const playerNumbers = currentPlayer.numbers;
+            
+            // Crea 27 celle (3 righe x 9 colonne)
+            for (let i = 0; i < 27; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'number-cell';
+                
+                // Calcola se questa cella dovrebbe avere un numero
+                const row = Math.floor(i / 9);
+                const col = i % 9;
+                
+                // I numeri della tombola sono raggruppati per colonna
+                // Colonna 0: numeri 1-10, Colonna 1: 11-20, ecc.
+                const minNum = col * 10 + 1;
+                const maxNum = col * 10 + 10;
+                
+                // Filtra i numeri del giocatore che rientrano in questa colonna
+                const colNumbers = playerNumbers.filter(num => num >= minNum && num <= maxNum);
+                
+                // Assegna 5 numeri per riga, distribuiti casualmente
+                if (row < colNumbers.length) {
+                    cell.textContent = colNumbers[row];
+                    cell.dataset.number = colNumbers[row];
+                    
+                    // Controlla se il numero è già stato estratto
+                    if (gameState.extractedNumbers.includes(colNumbers[row])) {
+                        cell.classList.add('extracted');
+                        
+                        // Se è l'ultimo estratto, aggiungi la classe recent
+                        if (gameState.extractedNumbers.length > 0 && 
+                            gameState.extractedNumbers[gameState.extractedNumbers.length - 1] === colNumbers[row]) {
+                            cell.classList.add('recent');
+                        }
+                    }
+                    
+                    cell.addEventListener('click', () => {
+                        if (gameState.extractedNumbers.includes(colNumbers[row])) {
+                            cell.classList.toggle('extracted');
+                        }
+                    });
+                } else {
+                    cell.classList.add('empty');
+                }
+                
+                tombolaCard.appendChild(cell);
+            }
+        }
+        
+        // Estrai un numero casuale (solo admin)
+        function extractNumber() {
+            if (!gameState.gameActive || gameState.remainingNumbers.length === 0) return;
+            
+            // Seleziona un numero casuale tra quelli rimanenti
+            const randomIndex = Math.floor(Math.random() * gameState.remainingNumbers.length);
+            const extractedNumber = gameState.remainingNumbers[randomIndex];
+            
+            // Rimuovi il numero estratto dall'array dei numeri rimanenti
+            gameState.remainingNumbers.splice(randomIndex, 1);
+            
+            // Aggiungi il numero estratto all'array degli estratti
+            gameState.extractedNumbers.push(extractedNumber);
+            
+            // Aggiorna display
+            updateNumberDisplay(extractedNumber);
+            updateExtractedNumbersDisplay();
+            updateGameStatus();
+            
+            // Controlla se qualcuno ha vinto
+            checkForWinner();
+            
+            // Passa al prossimo giocatore (simula turni)
+            updateCurrentPlayer();
+            
+            saveToStorage();
+        }
+        
+        // Avvia una nuova partita (solo admin)
+        function startNewGame() {
+            // Reset variabili
+            gameState.extractedNumbers = [];
+            gameState.remainingNumbers = Array.from({length: 90}, (_, i) => i + 1);
+            gameState.gameActive = true;
+            gameState.currentPlayerIndex = 0;
+            
+            // Ferma l'auto-estrazione se attiva
+            if (gameState.autoExtractInterval) {
+                clearInterval(gameState.autoExtractInterval);
+                gameState.autoExtractInterval = null;
+                document.getElementById('auto-btn').innerHTML = '<i class="fas fa-robot"></i> Auto Estr.';
+            }
+            
+            // Assegna nuove cartelle a tutti i giocatori
+            gameState.players.forEach(player => {
+                player.numbers = generateRandomNumbers(15, 1, 90);
+                player.extractedCount = 0;
+                player.hasWon = false;
+            });
+            
+            // Aggiorna display
+            updateNumberDisplay(null);
+            updateExtractedNumbersDisplay();
+            updateGameStatus();
+            updatePlayersDisplay();
+            
+            // Se l'utente corrente è un giocatore, aggiorna la sua cartella
+            if (currentUser.role === "player") {
+                createTombolaCard();
+            }
+            
+            // Nascondi modal se visibile
+            document.getElementById('winner-modal').style.display = 'none';
+            
+            // Abilita pulsanti
+            document.getElementById('extract-btn').disabled = false;
+            document.getElementById('auto-btn').disabled = false;
+            
+            saveToStorage();
+            
+            // Notifica i giocatori
+            showNotification("Nuova partita iniziata!", "success");
+        }
+        
+        // Aggiorna il display del numero estratto
+        function updateNumberDisplay(number) {
+            const numberDisplay = document.getElementById('number-display');
+            
+            if (number === null) {
+                numberDisplay.innerHTML = '<div class="number-label">Nessun numero estratto</div>';
+                numberDisplay.classList.add('empty');
+            } else {
+                numberDisplay.innerHTML = `
+                    <div class="extracted-number">${number}</div>
+                    <div class="number-label">Numero estratto</div>
+                `;
+                numberDisplay.classList.remove('empty');
+            }
+        }
+        
+        // Aggiorna la lista dei numeri estratti
+        function updateExtractedNumbersDisplay() {
+            const extractedNumbersContainer = document.getElementById('extracted-numbers');
+            extractedNumbersContainer.innerHTML = '';
+            
+            // Mostra solo gli ultimi 20 numeri estratti
+            const recentNumbers = gameState.extractedNumbers.slice(-20);
+            
+            recentNumbers.forEach((num, index) => {
+                const numElement = document.createElement('div');
+                numElement.className = 'extracted-num';
+                if (index === recentNumbers.length - 1 && gameState.extractedNumbers.length > 0) {
+                    numElement.classList.add('recent');
+                }
+                numElement.textContent = num;
+                extractedNumbersContainer.appendChild(numElement);
+            });
+            
+            // Aggiorna anche la cartella del giocatore corrente
+            if (currentUser.role === "player") {
+                createTombolaCard();
+            }
+        }
+        
+        // Aggiorna lo stato del gioco
+        function updateGameStatus() {
+            document.getElementById('remaining-numbers').textContent = gameState.remainingNumbers.length;
+            document.getElementById('extracted-count').textContent = gameState.extractedNumbers.length;
+            document.getElementById('players-count').textContent = gameState.players.filter(p => p.isActive).length;
+            document.getElementById('current-player').textContent = gameState.currentPlayerIndex + 1;
+        }
+        
+        // Aggiorna il display dei giocatori
+        function updatePlayersDisplay() {
+            const playersContainer = document.getElementById('players-container');
+            
+            if (gameState.players.length === 0) {
+                playersContainer.innerHTML = `
+                    <div style="text-align: center; padding: 30px; color: var(--text-secondary);">
+                        <i class="fas fa-users" style="font-size: 2rem; margin-bottom: 15px; display: block;"></i>
+                        <p>Nessun giocatore online. Attendi che altri giocatori si uniscano.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            playersContainer.innerHTML = '';
+            
+            // Mostra solo i giocatori attivi
+            const activePlayers = gameState.players.filter(p => p.isActive);
+            
+            activePlayers.forEach(player => {
+                const playerCard = document.createElement('div');
+                playerCard.className = 'player-card';
+                if (player.isActive) playerCard.classList.add('active');
+                if (player.hasWon) playerCard.classList.add('winner');
+                
+                // Calcola quanti numeri ha estratto questo giocatore
+                const extractedCount = player.numbers.filter(num => gameState.extractedNumbers.includes(num)).length;
+                player.extractedCount = extractedCount;
+                
+                playerCard.innerHTML = `
+                    <div class="player-header">
+                        <div class="player-name">
+                            ${player.hasWon ? '<i class="fas fa-trophy" style="color: var(--success);"></i>' : ''}
+                            ${player.code === currentUser.code ? '<i class="fas fa-user" style="color: var(--secondary);"></i>' : '<i class="far fa-user"></i>'}
+                            ${player.name}
+                        </div>
+                        <div class="player-card-count">${extractedCount}/15</div>
+                    </div>
+                    <div class="player-numbers">
+                        ${player.numbers.slice(0, 8).map(num => {
+                            const isExtracted = gameState.extractedNumbers.includes(num);
+                            return `<div class="player-num ${isExtracted ? 'extracted' : ''}">${num}</div>`;
+                        }).join('')}
+                        ${player.numbers.length > 8 ? '<div class="player-num">...</div>' : ''}
+                    </div>
+                `;
+                
+                playersContainer.appendChild(playerCard);
+            });
+        }
+        
+        // Passa al prossimo giocatore
+        function updateCurrentPlayer() {
+            // Se non ci sono giocatori, esci
+            if (gameState.players.length === 0) return;
+            
+            // Trova i giocatori attivi
+            const activePlayers = gameState.players.filter(p => p.isActive);
+            if (activePlayers.length === 0) return;
+            
+            // Trova l'indice del giocatore attivo corrente
+            const currentActiveIndex = activePlayers.findIndex(p => 
+                p.id === gameState.players[gameState.currentPlayerIndex]?.id
+            );
+            
+            // Calcola il prossimo indice
+            let nextIndex;
+            if (currentActiveIndex === -1 || currentActiveIndex === activePlayers.length - 1) {
+                nextIndex = 0;
+            } else {
+                nextIndex = currentActiveIndex + 1;
+            }
+            
+            // Trova l'indice effettivo nel gameState.players
+            const nextPlayer = activePlayers[nextIndex];
+            gameState.currentPlayerIndex = gameState.players.findIndex(p => p.id === nextPlayer.id);
+            
+            // Aggiorna display
+            updatePlayersDisplay();
+        }
+        
+        // Controlla se c'è un vincitore
+        function checkForWinner() {
+            // Per ogni giocatore, controlla se ha vinto
+            gameState.players.forEach(player => {
+                if (player.hasWon) return; // Già vincitore
+                
+                // Controlla se il giocatore ha tutti i numeri estratti
+                const allNumbersExtracted = player.numbers.every(num => gameState.extractedNumbers.includes(num));
+                
+                if (allNumbersExtracted) {
+                    player.hasWon = true;
+                    gameState.gameActive = false;
+                    
+                    // Mostra il modal del vincitore
+                    showWinnerModal(player);
+                    
+                    // Disabilita i pulsanti di estrazione
+                    document.getElementById('extract-btn').disabled = true;
+                    document.getElementById('auto-btn').disabled = true;
+                    
+                    // Ferma l'auto-estrazione se attiva
+                    if (gameState.autoExtractInterval) {
+                        clearInterval(gameState.autoExtractInterval);
+                        gameState.autoExtractInterval = null;
+                        document.getElementById('auto-btn').innerHTML = '<i class="fas fa-robot"></i> Auto Estr.';
+                    }
+                    
+                    saveToStorage();
+                }
+            });
+        }
+        
+        // Attiva/disattiva l'estrazione automatica (solo admin)
+        function toggleAutoExtract() {
+            const autoBtn = document.getElementById('auto-btn');
+            
+            if (gameState.autoExtractInterval) {
+                // Ferma l'estrazione automatica
+                clearInterval(gameState.autoExtractInterval);
+                gameState.autoExtractInterval = null;
+                autoBtn.innerHTML = '<i class="fas fa-robot"></i> Auto Estr.';
+            } else {
+                // Avvia l'estrazione automatica
+                gameState.autoExtractInterval = setInterval(() => {
+                    if (gameState.gameActive && gameState.remainingNumbers.length > 0) {
+                        extractNumber();
+                    } else {
+                        // Ferma l'estrazione automatica se il gioco è finito
+                        clearInterval(gameState.autoExtractInterval);
+                        gameState.autoExtractInterval = null;
+                        autoBtn.innerHTML = '<i class="fas fa-robot"></i> Auto Estr.';
+                    }
+                }, 1500); // Estrai un numero ogni 1.5 secondi
+                
+                autoBtn.innerHTML = '<i class="fas fa-stop"></i> Ferma Auto';
+            }
+        }
+        
+        // ============================================
+        // INTERFACCIA UTENTE
+        // ============================================
+        
+        // Mostra notifica
+        function showNotification(message, type = "info") {
+            // Crea un elemento per la notifica
+            const notification = document.createElement('div');
+            notification.textContent = message;
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 15px 20px;
+                background-color: ${type === "success" ? "var(--success)" : type === "error" ? "var(--danger)" : "var(--primary)"};
+                color: white;
+                border-radius: var(--border-radius);
+                box-shadow: var(--shadow);
+                z-index: 2000;
+                font-weight: 500;
+                animation: slideIn 0.3s ease;
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Rimuovi la notifica dopo 3 secondi
+            setTimeout(() => {
+                notification.style.animation = "slideOut 0.3s ease";
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 300);
+            }, 3000);
+        }
+        
+        // Mostra il modal del vincitore
+        function showWinnerModal(winner) {
+            const modal = document.getElementById('winner-modal');
+            const winnerText = document.getElementById('winner-text');
+            
+            winnerText.textContent = `${winner.name} ha completato la cartella e ha vinto la partita! Complimenti!`;
+            modal.style.display = 'flex';
+        }
+        
+        // Mostra i codici generati
+        function showGeneratedCodes(codes) {
+            const modal = document.getElementById('codes-modal');
+            const codesList = document.getElementById('generated-codes-list');
+            
+            codesList.innerHTML = '';
+            
+            codes.forEach(codeObj => {
+                const codeElement = document.createElement('div');
+                codeElement.style.cssText = `
+                    padding: 10px;
+                    margin-bottom: 8px;
+                    background-color: #222;
+                    border-radius: 4px;
+                    font-family: 'Source Code Pro', monospace;
+                    font-size: 1.1rem;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                `;
+                
+                codeElement.innerHTML = `
+                    <span>${codeObj.code}</span>
+                    <span style="color: var(--success); font-size: 0.9rem;">Disponibile</span>
+                `;
+                
+                codesList.appendChild(codeElement);
+            });
+            
+            modal.style.display = 'flex';
+        }
+        
+        // Aggiorna l'UI per la schermata di login
+        function updateUIForLogin() {
+            document.getElementById('login-screen').style.display = 'flex';
+            document.getElementById('game-screen').style.display = 'none';
+            
+            // Pulisci i campi del form
+            document.getElementById('login-code').value = '';
+            document.getElementById('player-name').value = '';
+            document.getElementById('admin-code').value = '';
+            
+            // Nascondi la sezione admin login
+            document.getElementById('admin-login-section').style.display = 'none';
+        }
+        
+        // Aggiorna l'UI per la schermata di gioco
+        function updateUIForGame() {
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('game-screen').style.display = 'flex';
+            
+            // Aggiorna le informazioni utente
+            document.getElementById('user-display-name').textContent = currentUser.name;
+            document.getElementById('user-role').textContent = currentUser.role === "admin" ? "Amministratore" : "Giocatore";
+            document.getElementById('user-role').className = `user-role role-${currentUser.role}`;
+            
+            // Aggiorna il sottotitolo
+            const subtitle = document.getElementById('game-subtitle');
+            if (currentUser.role === "admin") {
+                subtitle.textContent = "Sei l'amministratore. Gestisci il gioco e genera codici per i giocatori.";
+                document.getElementById('admin-controls').style.display = 'block';
+                document.getElementById('player-controls').style.display = 'none';
+                document.getElementById('player-info-text').textContent = "Come amministratore, puoi estrarre numeri e gestire il gioco.";
+            } else {
+                subtitle.textContent = `Benvenuto ${currentUser.name}! Segui i numeri estratti dall'amministratore.`;
+                document.getElementById('admin-controls').style.display = 'none';
+                document.getElementById('player-controls').style.display = 'block';
+                document.getElementById('player-info-text').textContent = "Clicca sui numeri estratti per segnarli sulla tua cartella. Solo l'amministratore può estrarre numeri.";
+                
+                // Crea la cartella per il giocatore
+                createTombolaCard();
+            }
+            
+            // Aggiorna lo stato del gioco
+            updateGameStatus();
+            updateExtractedNumbersDisplay();
+            updatePlayersDisplay();
+            
+            // Se il gioco è attivo, mostra l'ultimo numero estratto
+            if (gameState.extractedNumbers.length > 0) {
+                updateNumberDisplay(gameState.extractedNumbers[gameState.extractedNumbers.length - 1]);
+            } else {
+                updateNumberDisplay(null);
+            }
+        }
+        
+        // ============================================
+        // EVENT LISTENERS E INIZIALIZZAZIONE
+        // ============================================
+        
+        // Inizializza quando la pagina è caricata
+        document.addEventListener('DOMContentLoaded', () => {
+            initGame();
+            
+            // Login form per giocatori
+            document.getElementById('login-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                
+                const code = document.getElementById('login-code').value.trim().toUpperCase();
+                const playerName = document.getElementById('player-name').value.trim();
+                
+                if (!code) {
+                    showNotification("Inserisci un codice di accesso", "error");
+                    return;
+                }
+                
+                if (verifyAccessCode(code, false)) {
+                    if (loginUser(code, playerName, false)) {
+                        showNotification(`Benvenuto ${playerName || 'Giocatore'}!`, "success");
+                    } else {
+                        showNotification("Errore durante il login", "error");
+                    }
+                } else {
+                    showNotification("Codice di accesso non valido", "error");
+                }
+            });
+            
+            // Link per il login admin
+            document.getElementById('admin-login-link').addEventListener('click', (e) => {
+                e.preventDefault();
+                document.getElementById('admin-login-section').style.display = 'block';
+            });
+            
+            // Link per tornare al login giocatore
+            document.getElementById('back-to-player-login').addEventListener('click', (e) => {
+                e.preventDefault();
+                document.getElementById('admin-login-section').style.display = 'none';
+            });
+            
+            // Login form per admin
+            document.getElementById('admin-login-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                
+                const adminCode = document.getElementById('admin-code').value.trim();
+                
+                if (!adminCode) {
+                    showNotification("Inserisci il codice admin", "error");
+                    return;
+                }
+                
+                if (verifyAccessCode(adminCode, true)) {
+                    if (loginUser(adminCode, "Amministratore", true)) {
+                        showNotification("Accesso admin effettuato!", "success");
+                    }
+                } else {
+                    showNotification("Codice admin non valido", "error");
+                }
+            });
+            
+            // Logout
+            document.getElementById('logout-btn').addEventListener('click', logoutUser);
+            
+            // Pulsanti del gioco (solo admin)
+            document.getElementById('extract-btn').addEventListener('click', extractNumber);
+            document.getElementById('auto-btn').addEventListener('click', toggleAutoExtract);
+            document.getElementById('reset-btn').addEventListener('click', () => {
+                if (confirm("Sei sicuro di voler iniziare una nuova partita? Tutti i progressi andranno persi.")) {
+                    startNewGame();
+                }
+            });
+            
+            // Pulsante per gestire i codici (admin)
+            document.getElementById('toggle-codes-btn').addEventListener('click', () => {
+                const codeManagement = document.getElementById('code-management');
+                if (codeManagement.style.display === 'none') {
+                    codeManagement.style.display = 'block';
+                    updateCodeListDisplay();
+                } else {
+                    codeManagement.style.display = 'none';
+                }
+            });
+            
+            // Genera nuovi codici (admin)
+            document.getElementById('generate-codes-btn').addEventListener('click', () => {
+                const numCodes = parseInt(document.getElementById('num-codes').value) || 5;
+                
+                if (numCodes < 1 || numCodes > 50) {
+                    showNotification("Inserisci un numero tra 1 e 50", "error");
+                    return;
+                }
+                
+                const newCodes = generateAccessCodes(numCodes);
+                updateCodeListDisplay();
+                showGeneratedCodes(newCodes);
+                
+                showNotification(`${numCodes} nuovi codici generati!`, "success");
+            });
+            
+            // Modal buttons
+            document.getElementById('close-modal-btn').addEventListener('click', () => {
+                document.getElementById('winner-modal').style.display = 'none';
+            });
+            
+            document.getElementById('new-game-btn').addEventListener('click', () => {
+                document.getElementById('winner-modal').style.display = 'none';
+                startNewGame();
+            });
+            
+            document.getElementById('close-codes-modal-btn').addEventListener('click', () => {
+                document.getElementById('codes-modal').style.display = 'none';
+            });
+            
+            document.getElementById('copy-codes-btn').addEventListener('click', () => {
+                const codesList = document.getElementById('generated-codes-list');
+                const codes = Array.from(codesList.querySelectorAll('span:first-child'))
+                    .map(span => span.textContent)
+                    .join('\n');
+                
+                navigator.clipboard.writeText(codes)
+                    .then(() => showNotification("Codici copiati negli appunti!", "success"))
+                    .catch(() => showNotification("Errore nella copia dei codici", "error"));
+            });
+            
+            // Pulsante estrazione per giocatori (disabilitato)
+            document.getElementById('player-extract-btn').addEventListener('click', () => {
+                showNotification("Solo l'amministratore può estrarre numeri", "error");
+            });
+        });
+        
+        // Aggiorna la lista dei codici nel pannello admin
+        function updateCodeListDisplay() {
+            const codeList = document.getElementById('code-list');
+            const codes = gameDatabase.generatedCodes;
+            
+            if (codes.length === 0) {
+                codeList.innerHTML = `
+                    <div style="text-align: center; padding: 20px; color: var(--text-secondary);">
+                        <i class="fas fa-key" style="font-size: 2rem; margin-bottom: 10px; display: block;"></i>
+                        <p>Nessun codice generato. Genera nuovi codici per i giocatori.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Ordina i codici: prima quelli non usati, poi quelli usati
+            const sortedCodes = [...codes].sort((a, b) => {
+                if (a.used === b.used) return 0;
+                return a.used ? 1 : -1;
+            });
+            
+            codeList.innerHTML = '';
+            
+            sortedCodes.forEach(codeObj => {
+                const codeElement = document.createElement('div');
+                codeElement.className = 'code-item';
+                
+                codeElement.innerHTML = `
+                    <div>
+                        <div class="code-value">${codeObj.code}</div>
+                        ${codeObj.playerName ? `<div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 3px;">${codeObj.playerName}</div>` : ''}
+                    </div>
+                    <div class="code-status ${codeObj.used ? 'status-used' : 'status-unused'}">
+                        ${codeObj.used ? 'Usato' : 'Disponibile'}
+                    </div>
+                `;
+                
+                codeList.appendChild(codeElement);
+            });
+        }
+        
+        // Stili CSS aggiuntivi per le animazioni
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            
+            @keyframes slideOut {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(100%); opacity: 0; }
+            }
+            
+            .btn-sm {
+                padding: 8px 15px;
+                font-size: 0.9rem;
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>
