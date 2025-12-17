@@ -5,405 +5,188 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tombola Python - Multiplayer Realtime</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --primary: #306998;
-            --secondary: #FFD43B;
-            --accent: #4B8BBE;
-            --dark-bg: #121212;
-            --card-bg: #252526;
-            --text: #f5f5f5;
-            --success: #4CAF50;
-            --warning: #FF9800;
-            --danger: #f44336;
-        }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background: var(--dark-bg);
-            color: var(--text);
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        .container { max-width: 1200px; margin: 0 auto; }
-
-        /* Login */
-        .login-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-        }
-
-        .login-box {
-            background: var(--card-bg);
-            padding: 30px;
-            border-radius: 10px;
-            width: 100%;
-            max-width: 400px;
-            text-align: center;
-        }
-
-        .login-title {
-            color: var(--secondary);
-            font-family: 'Source Code Pro', monospace;
-            margin-bottom: 10px;
-        }
-
-        .form-group { margin-bottom: 20px; text-align: left; }
-        .form-input {
-            width: 100%;
-            padding: 10px;
-            background: #333;
-            border: 2px solid #444;
-            border-radius: 5px;
-            color: var(--text);
-            margin-top: 5px;
-        }
-
-        /* Game Screen */
-        .game-screen { display: none; }
-        
-        .header {
-            background: var(--card-bg);
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-
-        .game-area {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
-
-        @media (max-width: 768px) {
-            .game-area { grid-template-columns: 1fr; }
-        }
-
-        .card {
-            background: var(--card-bg);
-            padding: 20px;
-            border-radius: 10px;
-        }
-
-        /* Number Display */
-        .number-display {
-            background: rgba(0,0,0,0.3);
-            padding: 40px;
-            text-align: center;
-            border-radius: 10px;
-            margin: 20px 0;
-            min-height: 200px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .current-number {
-            font-size: 80px;
-            color: var(--secondary);
-            font-weight: bold;
-            font-family: 'Source Code Pro', monospace;
-        }
-
-        /* Controls */
-        .controls {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            justify-content: center;
-            margin: 20px 0;
-        }
-
-        .btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-family: 'Source Code Pro', monospace;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .btn-primary { background: var(--primary); color: white; }
-        .btn-success { background: var(--success); color: white; }
-        .btn-warning { background: var(--warning); color: white; }
-        .btn-danger { background: var(--danger); color: white; }
-
-        /* Players List */
-        .players-list {
-            display: grid;
-            gap: 10px;
-            margin-top: 20px;
-        }
-
-        .player-card {
-            background: #333;
-            padding: 15px;
-            border-radius: 5px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        /* Tombola Card */
-        .tombola-grid {
-            display: grid;
-            grid-template-columns: repeat(9, 1fr);
-            gap: 5px;
-            margin: 20px 0;
-        }
-
-        .cell {
-            aspect-ratio: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: #333;
-            border-radius: 3px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        .cell.extracted {
-            background: var(--primary);
-            color: white;
-        }
-
-        .cell.empty { background: transparent; cursor: default; }
-
-        /* Status Bar */
-        .status-bar {
-            display: flex;
-            justify-content: space-between;
-            background: var(--card-bg);
-            padding: 10px 20px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-        }
-
-        .status-item {
-            text-align: center;
-        }
-
-        .status-value {
-            font-size: 24px;
-            font-weight: bold;
-            color: var(--secondary);
-        }
-
-        /* Connection Status */
-        .connection-status {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: var(--card-bg);
-            padding: 10px 15px;
-            border-radius: 5px;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .online { color: var(--success); }
-        .offline { color: var(--danger); }
-
-        /* Admin Panel */
-        .admin-panel {
-            background: rgba(255, 193, 7, 0.1);
-            border: 2px solid var(--warning);
-            padding: 15px;
-            border-radius: 5px;
-            margin-top: 20px;
-        }
-
-        /* Modal */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .modal-content {
-            background: var(--card-bg);
-            padding: 30px;
-            border-radius: 10px;
-            max-width: 500px;
-            width: 90%;
-        }
-
-        /* Notification */
-        .notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: var(--primary);
-            color: white;
-            padding: 15px 20px;
-            border-radius: 5px;
-            animation: slideIn 0.3s ease;
-            z-index: 1000;
-        }
-
-        @keyframes slideIn {
-            from { transform: translateX(100%); }
-            to { transform: translateX(0); }
-        }
-    </style>
+    <link rel="stylesheet" href="style.css">
+    <script src="/socket.io/socket.io.js"></script>
 </head>
 <body>
-    <div class="container">
-        <!-- Login Screen -->
-        <div class="login-container" id="login-screen">
-            <div class="login-box">
-                <h1 class="login-title">🎲 Tombola Python 🐍</h1>
-                <p style="margin-bottom: 20px; color: #ccc;">Sistema multiplayer in tempo reale</p>
-                
+    <!-- Login Screen -->
+    <div class="login-screen">
+        <div class="container">
+            <div class="login-card">
+                <div class="logo">
+                    <h1><span class="python">Python</span> Tombola</h1>
+                    <p class="subtitle">Sistema multiplayer in tempo reale</p>
+                </div>
+
+                <!-- Player Login -->
                 <div id="player-login">
                     <div class="form-group">
-                        <label>Codice Giocatore</label>
-                        <input type="text" class="form-input" id="player-code" placeholder="Es: PLAYER001">
+                        <label class="form-label">Codice Giocatore</label>
+                        <input type="text" class="form-input" id="player-code" placeholder="PLAYER001, PLAYER002, ...">
                     </div>
+                    
                     <div class="form-group">
-                        <label>Nome Giocatore</label>
+                        <label class="form-label">Nome Giocatore</label>
                         <input type="text" class="form-input" id="player-name" placeholder="Il tuo nome">
                     </div>
-                    <button class="btn btn-primary" style="width: 100%;" onclick="loginAsPlayer()">
+                    
+                    <button class="btn btn-primary" id="player-login-btn" style="width: 100%;">
                         <i class="fas fa-sign-in-alt"></i> Accedi come Giocatore
                     </button>
-                </div>
-
-                <div style="margin: 20px 0; text-align: center;">
-                    <hr style="border-color: #444; margin: 20px 0;">
-                    <p style="color: #aaa;">Sei l'amministratore?</p>
-                    <button class="btn btn-warning" onclick="showAdminLogin()">
-                        <i class="fas fa-user-shield"></i> Accedi come Admin
+                    
+                    <div class="divider">
+                        <span>Oppure</span>
+                    </div>
+                    
+                    <button class="btn btn-secondary" id="admin-switch" style="width: 100%;">
+                        <i class="fas fa-user-shield"></i> Sono l'Amministratore
                     </button>
                 </div>
 
+                <!-- Admin Login -->
                 <div id="admin-login" style="display: none;">
                     <div class="form-group">
-                        <label>Codice Admin</label>
-                        <input type="password" class="form-input" id="admin-code" placeholder="Codice segreto admin">
+                        <label class="form-label">Codice Admin</label>
+                        <input type="password" class="form-input" id="admin-code" placeholder="Inserisci il codice admin">
+                        <small style="color: var(--text-secondary); margin-top: 5px; display: block;">
+                            Codice predefinito: PYTHON2024_ADMIN
+                        </small>
                     </div>
-                    <button class="btn btn-warning" style="width: 100%;" onclick="loginAsAdmin()">
+                    
+                    <button class="btn btn-warning" id="admin-login-btn" style="width: 100%;">
                         <i class="fas fa-user-cog"></i> Accedi come Admin
                     </button>
-                    <button class="btn" style="width: 100%; margin-top: 10px;" onclick="hideAdminLogin()">
-                        ← Torna al login giocatore
+                    
+                    <button class="btn btn-secondary" id="player-switch" style="width: 100%; margin-top: 15px;">
+                        <i class="fas fa-user"></i> Sono un Giocatore
                     </button>
                 </div>
             </div>
         </div>
+    </div>
 
-        <!-- Game Screen -->
-        <div class="game-screen" id="game-screen">
-            <!-- User Info Bar -->
-            <div class="status-bar">
-                <div class="status-item">
-                    <div class="status-value" id="user-role">Giocatore</div>
-                    <div>Ruolo</div>
+    <!-- Game Screen -->
+    <div class="game-screen">
+        <div class="container">
+            <!-- Header -->
+            <div class="header">
+                <div class="user-info">
+                    <div class="user-details">
+                        <div class="user-avatar">
+                            <i class="fas fa-user" id="user-icon"></i>
+                        </div>
+                        <div class="user-text">
+                            <h3 id="user-name">-</h3>
+                            <span class="user-role" id="user-role">-</span>
+                        </div>
+                    </div>
+                    
+                    <button class="btn btn-danger" id="logout-btn">
+                        <i class="fas fa-sign-out-alt"></i> Esci
+                    </button>
                 </div>
-                <div class="status-item">
-                    <div class="status-value" id="user-name">-</div>
-                    <div>Nome</div>
+                
+                <div class="status-grid">
+                    <div class="status-card">
+                        <div class="status-value" id="numbers-left">90</div>
+                        <div class="status-label">Numeri Rimasti</div>
+                    </div>
+                    
+                    <div class="status-card">
+                        <div class="status-value" id="extracted-count">0</div>
+                        <div class="status-label">Numeri Estratti</div>
+                    </div>
+                    
+                    <div class="status-card">
+                        <div class="status-value" id="players-count">0</div>
+                        <div class="status-label">Giocatori Online</div>
+                    </div>
+                    
+                    <div class="status-card">
+                        <div class="status-value" id="current-turn">-</div>
+                        <div class="status-label">Turno Attuale</div>
+                    </div>
                 </div>
-                <div class="status-item">
-                    <div class="status-value" id="players-online">0</div>
-                    <div>Giocatori Online</div>
-                </div>
-                <div class="status-item">
-                    <div class="status-value" id="numbers-left">90</div>
-                    <div>Numeri Rimasti</div>
-                </div>
-                <button class="btn btn-danger" onclick="logout()">
-                    <i class="fas fa-sign-out-alt"></i> Esci
-                </button>
             </div>
 
+            <!-- Game Area -->
             <div class="game-area">
                 <!-- Left Column: Game Control -->
                 <div class="card">
-                    <h2><i class="fas fa-dice"></i> Estrazione Numeri</h2>
+                    <h2 class="card-title">
+                        <i class="fas fa-dice"></i> Estrazione Numeri
+                    </h2>
                     
-                    <div class="number-display" id="number-display">
-                        <div id="no-number" style="color: #888;">
-                            <i class="fas fa-hourglass-half" style="font-size: 40px; margin-bottom: 10px;"></i>
-                            <div>In attesa del primo numero...</div>
+                    <div class="number-display">
+                        <div id="no-number">
+                            <i class="fas fa-hourglass-half" style="font-size: 4rem; color: var(--text-secondary); margin-bottom: 20px;"></i>
+                            <div style="color: var(--text-secondary); font-size: 1.2rem;">
+                                In attesa del primo numero...
+                            </div>
                         </div>
                         <div id="current-number" style="display: none;">
                             <div class="current-number" id="current-number-value">-</div>
-                            <div style="color: #aaa; margin-top: 10px;">Ultimo numero estratto</div>
+                            <div class="number-label">Ultimo numero estratto</div>
                         </div>
                     </div>
 
                     <!-- Admin Controls -->
                     <div id="admin-controls" style="display: none;">
                         <div class="admin-panel">
-                            <h3><i class="fas fa-user-cog"></i> Controlli Admin</h3>
+                            <h3 class="admin-title">
+                                <i class="fas fa-user-cog"></i> Controlli Amministratore
+                            </h3>
+                            
                             <div class="controls">
-                                <button class="btn btn-primary" onclick="extractNumber()">
+                                <button class="btn btn-primary" id="extract-btn">
                                     <i class="fas fa-play"></i> Estrai Numero
                                 </button>
-                                <button class="btn btn-success" onclick="toggleAutoExtract()" id="auto-btn">
+                                
+                                <button class="btn btn-success" id="auto-btn">
                                     <i class="fas fa-robot"></i> Auto Estr.
                                 </button>
-                                <button class="btn btn-warning" onclick="showCodeManager()">
-                                    <i class="fas fa-key"></i> Gestisci Codici
-                                </button>
-                                <button class="btn" onclick="startNewGame()">
+                                
+                                <button class="btn btn-warning" id="new-game-btn">
                                     <i class="fas fa-redo"></i> Nuova Partita
+                                </button>
+                                
+                                <button class="btn btn-secondary" id="manage-codes-btn">
+                                    <i class="fas fa-key"></i> Gestisci Codici
                                 </button>
                             </div>
                         </div>
                     </div>
 
                     <!-- Player Message -->
-                    <div id="player-message" style="text-align: center; padding: 20px; color: #aaa;">
+                    <div id="player-message" style="display: none; text-align: center; padding: 20px; color: var(--text-secondary);">
                         <i class="fas fa-info-circle"></i> In attesa che l'amministratore estragga i numeri...
                     </div>
 
                     <!-- Extracted Numbers -->
-                    <h3 style="margin-top: 30px;"><i class="fas fa-history"></i> Numeri Estratti</h3>
-                    <div id="extracted-numbers" style="
-                        display: flex;
-                        flex-wrap: wrap;
-                        gap: 8px;
-                        padding: 15px;
-                        background: rgba(0,0,0,0.2);
-                        border-radius: 5px;
-                        margin-top: 10px;
-                        min-height: 60px;
-                    ">
+                    <h3 class="card-title" style="margin-top: 30px;">
+                        <i class="fas fa-history"></i> Ultimi Numeri Estratti
+                    </h3>
+                    <div class="extracted-numbers" id="extracted-numbers">
                         <!-- Numbers will appear here -->
                     </div>
                 </div>
 
                 <!-- Right Column: Player Board -->
                 <div class="card">
-                    <h2><i class="fas fa-table"></i> La tua Cartella</h2>
+                    <h2 class="card-title">
+                        <i class="fas fa-table"></i> La tua Cartella
+                    </h2>
                     
-                    <div class="tombola-grid" id="tombola-grid">
-                        <!-- Tombola grid will be generated here -->
+                    <div class="tombola-section">
+                        <div class="tombola-grid" id="tombola-grid">
+                            <!-- Tombola grid will be generated here -->
+                        </div>
                     </div>
 
-                    <div style="margin-top: 30px;">
-                        <h3><i class="fas fa-users"></i> Giocatori Online</h3>
+                    <div class="players-section">
+                        <h3 class="card-title">
+                            <i class="fas fa-users"></i> Giocatori Online
+                        </h3>
                         <div class="players-list" id="players-list">
                             <!-- Players will appear here -->
                         </div>
@@ -414,816 +197,91 @@
     </div>
 
     <!-- Modals -->
-    <div class="modal" id="winner-modal">
-        <div class="modal-content">
-            <h2 style="color: var(--secondary); margin-bottom: 20px;">🎉 TOMBOLA! 🎉</h2>
-            <p id="winner-message" style="margin-bottom: 20px;"></p>
-            <div style="display: flex; gap: 10px; justify-content: center;">
-                <button class="btn btn-primary" onclick="closeModal('winner-modal')">Continua</button>
-                <button class="btn btn-success" onclick="startNewGame()">Nuova Partita</button>
+    
+    <!-- Winner Modal -->
+    <div class="modal-overlay" id="winner-modal-overlay">
+        <div class="modal">
+            <h2 class="modal-title">🎉 TOMBOLA! 🎉</h2>
+            <div class="modal-content">
+                <p style="text-align: center; font-size: 1.2rem;">
+                    <strong id="winner-name">-</strong> ha completato la cartella e ha vinto la partita!
+                </p>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" id="close-winner-modal">
+                    Continua a giocare
+                </button>
+                <button class="btn btn-primary" id="new-game-modal-btn">
+                    Nuova Partita
+                </button>
             </div>
         </div>
     </div>
 
-    <div class="modal" id="codes-modal">
-        <div class="modal-content">
-            <h2 style="color: var(--warning); margin-bottom: 20px;"><i class="fas fa-key"></i> Gestione Codici</h2>
-            
-            <div style="margin-bottom: 20px;">
-                <div style="display: flex; gap: 10px; align-items: center;">
-                    <input type="number" id="codes-to-generate" min="1" max="50" value="5" style="flex: 1;">
-                    <button class="btn btn-warning" onclick="generateCodes()">
-                        <i class="fas fa-plus"></i> Genera
-                    </button>
+    <!-- Codes Modal -->
+    <div class="modal-overlay" id="codes-modal-overlay">
+        <div class="modal">
+            <h2 class="modal-title">
+                <i class="fas fa-key"></i> Gestione Codici
+            </h2>
+            <div class="modal-content">
+                <div style="margin-bottom: 20px;">
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <input type="number" class="form-input" id="codes-count" min="1" max="50" value="5" style="flex: 1;">
+                        <button class="btn btn-warning" id="generate-codes-btn">
+                            <i class="fas fa-plus"></i> Genera Codici
+                        </button>
+                    </div>
                 </div>
-            </div>
-
-            <div style="max-height: 300px; overflow-y: auto;">
-                <div id="codes-list">
+                
+                <div class="codes-list" id="codes-list">
                     <!-- Codes will appear here -->
                 </div>
             </div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" id="close-codes-modal">
+                    Chiudi
+                </button>
+                <button class="btn btn-primary" id="copy-codes-btn">
+                    <i class="fas fa-copy"></i> Copia Codici
+                </button>
+            </div>
+        </div>
+    </div>
 
-            <div style="margin-top: 20px; display: flex; gap: 10px; justify-content: center;">
-                <button class="btn btn-primary" onclick="closeModal('codes-modal')">Chiudi</button>
-                <button class="btn" onclick="copyAllCodes()">
-                    <i class="fas fa-copy"></i> Copia Tutti
+    <!-- Generated Codes Modal -->
+    <div class="modal-overlay" id="generated-codes-modal-overlay">
+        <div class="modal">
+            <h2 class="modal-title">
+                <i class="fas fa-key"></i> Codici Generati
+            </h2>
+            <div class="modal-content">
+                <p style="margin-bottom: 15px;">Ecco i nuovi codici generati. Condividili con i giocatori:</p>
+                <div id="generated-codes" style="
+                    background: rgba(0, 0, 0, 0.2);
+                    padding: 15px;
+                    border-radius: 8px;
+                    font-family: monospace;
+                    max-height: 200px;
+                    overflow-y: auto;
+                ">
+                    <!-- Generated codes will appear here -->
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-primary" onclick="document.getElementById('generated-codes-modal-overlay').style.display = 'none'">
+                    Chiudi
                 </button>
             </div>
         </div>
     </div>
 
     <!-- Connection Status -->
-    <div class="connection-status" id="connection-status">
-        <i class="fas fa-circle" id="connection-icon"></i>
+    <div class="connection-status">
+        <div class="connection-dot" id="connection-dot"></div>
         <span id="connection-text">Connessione...</span>
     </div>
 
-    <script>
-        // ============================================
-        // CONFIGURAZIONE
-        // ============================================
-        const CONFIG = {
-            ADMIN_CODE: "PYTHON2024_ADMIN",
-            STORAGE_KEY: "tombola_server_state",
-            SYNC_INTERVAL: 1000, // 1 secondo
-            AUTO_EXTRACT_INTERVAL: 1500, // 1.5 secondi
-            MAX_PLAYERS: 20
-        };
-
-        // ============================================
-        // SERVER STATE (Simulato nel localStorage)
-        // ============================================
-        let serverState = {
-            // Stato del gioco
-            game: {
-                active: false,
-                extractedNumbers: [],
-                lastExtracted: null,
-                lastExtractedTime: null,
-                winner: null
-            },
-            
-            // Giocatori online
-            players: [],
-            
-            // Codici disponibili
-            codes: [],
-            
-            // Timestamp ultimo aggiornamento
-            lastUpdated: Date.now(),
-            
-            // Admin session
-            admin: {
-                connected: false,
-                lastActivity: null
-            }
-        };
-
-        // ============================================
-        // USER STATE
-        // ============================================
-        let user = {
-            loggedIn: false,
-            role: null, // 'admin' o 'player'
-            code: null,
-            name: null,
-            playerId: null,
-            cardNumbers: []
-        };
-
-        // ============================================
-        // INTERVALS
-        // ============================================
-        let syncInterval = null;
-        let autoExtractInterval = null;
-
-        // ============================================
-        // FUNZIONI SERVER
-        // ============================================
-
-        // Carica stato server dal localStorage
-        function loadServerState() {
-            try {
-                const saved = localStorage.getItem(CONFIG.STORAGE_KEY);
-                if (saved) {
-                    const parsed = JSON.parse(saved);
-                    // Mantieni solo se è recente (meno di 1 ora)
-                    if (Date.now() - parsed.lastUpdated < 3600000) {
-                        serverState = parsed;
-                        console.log("Server state loaded");
-                    }
-                }
-            } catch (e) {
-                console.error("Error loading server state:", e);
-            }
-        }
-
-        // Salva stato server nel localStorage
-        function saveServerState() {
-            try {
-                serverState.lastUpdated = Date.now();
-                localStorage.setItem(CONFIG.STORAGE_KEY, JSON.stringify(serverState));
-                updateConnectionStatus(true);
-            } catch (e) {
-                console.error("Error saving server state:", e);
-                updateConnectionStatus(false);
-            }
-        }
-
-        // Inizializza server
-        function initServer() {
-            loadServerState();
-            
-            // Se non ci sono codici, generane alcuni
-            if (serverState.codes.length === 0) {
-                generateInitialCodes();
-            }
-            
-            // Avvia sincronizzazione
-            startSync();
-            
-            console.log("Server initialized");
-        }
-
-        // ============================================
-        // FUNZIONI UTENTE
-        // ============================================
-
-        function loginAsPlayer() {
-            const code = document.getElementById('player-code').value.trim().toUpperCase();
-            const name = document.getElementById('player-name').value.trim() || `Giocatore_${Math.floor(Math.random() * 1000)}`;
-            
-            if (!code) {
-                showNotification("Inserisci un codice valido", "error");
-                return;
-            }
-            
-            // Verifica se il codice esiste
-            const codeEntry = serverState.codes.find(c => c.code === code);
-            if (!codeEntry) {
-                showNotification("Codice non valido", "error");
-                return;
-            }
-            
-            // Verifica se già in uso
-            const existingPlayer = serverState.players.find(p => p.code === code);
-            if (existingPlayer && existingPlayer.connected) {
-                // Riconnessione
-                user = {
-                    loggedIn: true,
-                    role: 'player',
-                    code: code,
-                    name: existingPlayer.name,
-                    playerId: existingPlayer.id,
-                    cardNumbers: existingPlayer.cardNumbers
-                };
-                
-                existingPlayer.lastActivity = Date.now();
-                existingPlayer.connected = true;
-            } else {
-                // Nuovo giocatore
-                const playerId = 'player_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
-                const cardNumbers = generateCardNumbers();
-                
-                user = {
-                    loggedIn: true,
-                    role: 'player',
-                    code: code,
-                    name: name,
-                    playerId: playerId,
-                    cardNumbers: cardNumbers
-                };
-                
-                // Aggiungi al server
-                serverState.players.push({
-                    id: playerId,
-                    code: code,
-                    name: name,
-                    cardNumbers: cardNumbers,
-                    connected: true,
-                    lastActivity: Date.now(),
-                    extractedCount: 0,
-                    hasWon: false
-                });
-                
-                // Aggiorna codice
-                if (codeEntry) {
-                    codeEntry.used = true;
-                    codeEntry.playerName = name;
-                }
-            }
-            
-            saveServerState();
-            showGameScreen();
-            showNotification(`Benvenuto ${name}!`, "success");
-        }
-
-        function loginAsAdmin() {
-            const code = document.getElementById('admin-code').value.trim();
-            
-            if (code !== CONFIG.ADMIN_CODE) {
-                showNotification("Codice admin non valido", "error");
-                return;
-            }
-            
-            user = {
-                loggedIn: true,
-                role: 'admin',
-                code: code,
-                name: 'Amministratore',
-                playerId: 'admin'
-            };
-            
-            serverState.admin.connected = true;
-            serverState.admin.lastActivity = Date.now();
-            
-            // Assicurati che il gioco sia attivo
-            if (!serverState.game.active) {
-                serverState.game.active = true;
-            }
-            
-            saveServerState();
-            showGameScreen();
-            showNotification("Accesso admin effettuato!", "success");
-        }
-
-        function logout() {
-            if (user.role === 'admin') {
-                serverState.admin.connected = false;
-            } else if (user.role === 'player') {
-                const playerIndex = serverState.players.findIndex(p => p.id === user.playerId);
-                if (playerIndex !== -1) {
-                    serverState.players[playerIndex].connected = false;
-                }
-            }
-            
-            user = { loggedIn: false, role: null };
-            saveServerState();
-            showLoginScreen();
-            showNotification("Logout effettuato", "info");
-        }
-
-        // ============================================
-        // FUNZIONI GIOCO
-        // ============================================
-
-        function extractNumber() {
-            if (!serverState.game.active) {
-                showNotification("Il gioco non è attivo", "error");
-                return;
-            }
-            
-            // Genera numeri rimasti se non esistono
-            if (serverState.game.extractedNumbers.length === 0) {
-                const allNumbers = Array.from({length: 90}, (_, i) => i + 1);
-                const shuffled = [...allNumbers].sort(() => Math.random() - 0.5);
-                serverState.game.remaining = shuffled;
-            }
-            
-            // Estrai numero
-            if (serverState.game.remaining && serverState.game.remaining.length > 0) {
-                const extracted = serverState.game.remaining.pop();
-                serverState.game.extractedNumbers.push(extracted);
-                serverState.game.lastExtracted = extracted;
-                serverState.game.lastExtractedTime = Date.now();
-                
-                // Aggiorna conteggio giocatori
-                updatePlayersExtractedCount(extracted);
-                
-                // Controlla vincitori
-                checkForWinners();
-                
-                saveServerState();
-                updateGameUI();
-                
-                // Notifica
-                showNotification(`Estratto il numero ${extracted}!`, "success");
-                
-                return extracted;
-            } else {
-                showNotification("Tutti i numeri sono stati estratti!", "info");
-                return null;
-            }
-        }
-
-        function updatePlayersExtractedCount(extractedNumber) {
-            serverState.players.forEach(player => {
-                if (player.cardNumbers.includes(extractedNumber)) {
-                    player.extractedCount = (player.extractedCount || 0) + 1;
-                    
-                    // Controlla se ha vinto
-                    if (player.extractedCount === 15 && !player.hasWon) {
-                        player.hasWon = true;
-                        serverState.game.winner = player;
-                        announceWinner(player);
-                    }
-                }
-            });
-        }
-
-        function checkForWinners() {
-            // Già gestito in updatePlayersExtractedCount
-        }
-
-        function announceWinner(player) {
-            serverState.game.active = false;
-            saveServerState();
-            
-            document.getElementById('winner-message').textContent = 
-                `🎉 ${player.name} ha completato la cartella e ha vinto la partita! 🎉`;
-            document.getElementById('winner-modal').style.display = 'flex';
-        }
-
-        function startNewGame() {
-            // Resetta gioco
-            serverState.game = {
-                active: true,
-                extractedNumbers: [],
-                lastExtracted: null,
-                lastExtractedTime: null,
-                winner: null,
-                remaining: Array.from({length: 90}, (_, i) => i + 1).sort(() => Math.random() - 0.5)
-            };
-            
-            // Resetta giocatori
-            serverState.players.forEach(player => {
-                if (player.connected) {
-                    player.cardNumbers = generateCardNumbers();
-                    player.extractedCount = 0;
-                    player.hasWon = false;
-                }
-            });
-            
-            // Aggiorna stato utente corrente
-            if (user.role === 'player') {
-                const player = serverState.players.find(p => p.id === user.playerId);
-                if (player) {
-                    user.cardNumbers = player.cardNumbers;
-                }
-            }
-            
-            saveServerState();
-            updateGameUI();
-            closeModal('winner-modal');
-            showNotification("Nuova partita iniziata!", "success");
-        }
-
-        function toggleAutoExtract() {
-            const btn = document.getElementById('auto-btn');
-            
-            if (autoExtractInterval) {
-                clearInterval(autoExtractInterval);
-                autoExtractInterval = null;
-                btn.innerHTML = '<i class="fas fa-robot"></i> Auto Estr.';
-                showNotification("Auto-estrazione disattivata", "info");
-            } else {
-                autoExtractInterval = setInterval(() => {
-                    if (serverState.game.active && 
-                        serverState.game.extractedNumbers.length < 90) {
-                        extractNumber();
-                    } else {
-                        toggleAutoExtract(); // Disattiva automaticamente
-                    }
-                }, CONFIG.AUTO_EXTRACT_INTERVAL);
-                
-                btn.innerHTML = '<i class="fas fa-stop"></i> Ferma Auto';
-                showNotification("Auto-estrazione attivata", "success");
-            }
-        }
-
-        // ============================================
-        // GESTIONE CODICI
-        // ============================================
-
-        function generateInitialCodes() {
-            const codes = [];
-            for (let i = 1; i <= 20; i++) {
-                codes.push({
-                    code: `PLAYER${i.toString().padStart(3, '0')}`,
-                    used: false,
-                    playerName: '',
-                    generatedAt: new Date().toISOString()
-                });
-            }
-            serverState.codes = codes;
-            saveServerState();
-        }
-
-        function generateCodes() {
-            const count = parseInt(document.getElementById('codes-to-generate').value) || 5;
-            const newCodes = [];
-            
-            const existingCount = serverState.codes.length;
-            
-            for (let i = 1; i <= count; i++) {
-                const codeNumber = existingCount + i;
-                newCodes.push({
-                    code: `PLAYER${codeNumber.toString().padStart(3, '0')}`,
-                    used: false,
-                    playerName: '',
-                    generatedAt: new Date().toISOString()
-                });
-            }
-            
-            serverState.codes.push(...newCodes);
-            saveServerState();
-            updateCodesList();
-            
-            showNotification(`${count} nuovi codici generati!`, "success");
-        }
-
-        function updateCodesList() {
-            const container = document.getElementById('codes-list');
-            container.innerHTML = '';
-            
-            serverState.codes.forEach(code => {
-                const div = document.createElement('div');
-                div.style.cssText = `
-                    padding: 10px;
-                    margin: 5px 0;
-                    background: #333;
-                    border-radius: 5px;
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                `;
-                
-                div.innerHTML = `
-                    <div>
-                        <strong>${code.code}</strong>
-                        ${code.playerName ? `<div style="font-size: 12px; color: #aaa;">${code.playerName}</div>` : ''}
-                    </div>
-                    <div style="
-                        background: ${code.used ? 'var(--danger)' : 'var(--success)'};
-                        color: white;
-                        padding: 3px 8px;
-                        border-radius: 3px;
-                        font-size: 12px;
-                    ">
-                        ${code.used ? 'Usato' : 'Disponibile'}
-                    </div>
-                `;
-                
-                container.appendChild(div);
-            });
-        }
-
-        function copyAllCodes() {
-            const availableCodes = serverState.codes
-                .filter(c => !c.used)
-                .map(c => c.code)
-                .join('\n');
-            
-            if (availableCodes) {
-                navigator.clipboard.writeText(availableCodes)
-                    .then(() => showNotification("Codici copiati!", "success"))
-                    .catch(() => showNotification("Errore nella copia", "error"));
-            } else {
-                showNotification("Nessun codice disponibile", "info");
-            }
-        }
-
-        // ============================================
-        // FUNZIONI UI
-        // ============================================
-
-        function showLoginScreen() {
-            document.getElementById('login-screen').style.display = 'flex';
-            document.getElementById('game-screen').style.display = 'none';
-            
-            // Pulisci campi
-            document.getElementById('player-code').value = '';
-            document.getElementById('player-name').value = '';
-            document.getElementById('admin-code').value = '';
-            
-            // Nascondi admin login
-            document.getElementById('admin-login').style.display = 'none';
-            document.getElementById('player-login').style.display = 'block';
-        }
-
-        function showGameScreen() {
-            document.getElementById('login-screen').style.display = 'none';
-            document.getElementById('game-screen').style.display = 'block';
-            
-            // Aggiorna info utente
-            document.getElementById('user-role').textContent = user.role === 'admin' ? 'Admin' : 'Giocatore';
-            document.getElementById('user-name').textContent = user.name;
-            
-            // Mostra/nascondi controlli admin
-            if (user.role === 'admin') {
-                document.getElementById('admin-controls').style.display = 'block';
-                document.getElementById('player-message').style.display = 'none';
-            } else {
-                document.getElementById('admin-controls').style.display = 'none';
-                document.getElementById('player-message').style.display = 'block';
-            }
-            
-            // Aggiorna UI
-            updateGameUI();
-            createTombolaGrid();
-        }
-
-        function updateGameUI() {
-            // Aggiorna numeri estratti
-            updateExtractedNumbersDisplay();
-            
-            // Aggiorna ultimo numero
-            if (serverState.game.lastExtracted) {
-                document.getElementById('no-number').style.display = 'none';
-                document.getElementById('current-number').style.display = 'block';
-                document.getElementById('current-number-value').textContent = serverState.game.lastExtracted;
-            } else {
-                document.getElementById('no-number').style.display = 'block';
-                document.getElementById('current-number').style.display = 'none';
-            }
-            
-            // Aggiorna conteggi
-            document.getElementById('numbers-left').textContent = 
-                90 - serverState.game.extractedNumbers.length;
-            
-            // Aggiorna giocatori online
-            const onlinePlayers = serverState.players.filter(p => p.connected).length;
-            document.getElementById('players-online').textContent = onlinePlayers;
-            
-            // Aggiorna lista giocatori
-            updatePlayersList();
-        }
-
-        function updateExtractedNumbersDisplay() {
-            const container = document.getElementById('extracted-numbers');
-            container.innerHTML = '';
-            
-            const lastNumbers = serverState.game.extractedNumbers.slice(-20);
-            
-            lastNumbers.forEach((num, index) => {
-                const span = document.createElement('span');
-                span.textContent = num;
-                span.style.cssText = `
-                    background: ${index === lastNumbers.length - 1 ? 'var(--secondary)' : 'var(--primary)'};
-                    color: ${index === lastNumbers.length - 1 ? '#333' : 'white'};
-                    padding: 5px 10px;
-                    border-radius: 50%;
-                    font-weight: bold;
-                    display: inline-block;
-                    min-width: 30px;
-                    text-align: center;
-                `;
-                container.appendChild(span);
-            });
-        }
-
-        function updatePlayersList() {
-            const container = document.getElementById('players-list');
-            container.innerHTML = '';
-            
-            const onlinePlayers = serverState.players.filter(p => p.connected);
-            
-            if (onlinePlayers.length === 0) {
-                container.innerHTML = '<div style="color: #888; text-align: center; padding: 20px;">Nessun giocatore online</div>';
-                return;
-            }
-            
-            onlinePlayers.forEach(player => {
-                const div = document.createElement('div');
-                div.className = 'player-card';
-                
-                div.innerHTML = `
-                    <div>
-                        <strong>${player.name}</strong>
-                        <div style="font-size: 12px; color: #aaa;">${player.code}</div>
-                    </div>
-                    <div style="
-                        background: ${player.hasWon ? 'var(--success)' : 'var(--primary)'};
-                        color: white;
-                        padding: 5px 10px;
-                        border-radius: 3px;
-                        font-weight: bold;
-                    ">
-                        ${player.extractedCount || 0}/15
-                        ${player.hasWon ? ' 🏆' : ''}
-                    </div>
-                `;
-                
-                container.appendChild(div);
-            });
-        }
-
-        function createTombolaGrid() {
-            const container = document.getElementById('tombola-grid');
-            container.innerHTML = '';
-            
-            if (user.role !== 'player' || !user.cardNumbers || user.cardNumbers.length === 0) {
-                container.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: #888;">Caricamento cartella...</div>';
-                return;
-            }
-            
-            // Crea 27 celle (3 righe × 9 colonne)
-            for (let i = 0; i < 27; i++) {
-                const cell = document.createElement('div');
-                cell.className = 'cell';
-                
-                const row = Math.floor(i / 9);
-                const col = i % 9;
-                
-                // Numeri per questa colonna (1-10, 11-20, ...)
-                const minNum = col * 10 + 1;
-                const maxNum = col * 10 + 10;
-                
-                // Numeri del giocatore in questa colonna
-                const colNumbers = user.cardNumbers.filter(n => n >= minNum && n <= maxNum).sort((a, b) => a - b);
-                
-                if (row < colNumbers.length) {
-                    const num = colNumbers[row];
-                    cell.textContent = num;
-                    
-                    // Segna se estratto
-                    if (serverState.game.extractedNumbers.includes(num)) {
-                        cell.classList.add('extracted');
-                    }
-                    
-                    // Click per segnare (solo per giocatori)
-                    cell.onclick = () => {
-                        if (serverState.game.extractedNumbers.includes(num)) {
-                            cell.classList.toggle('extracted');
-                        }
-                    };
-                } else {
-                    cell.classList.add('empty');
-                }
-                
-                container.appendChild(cell);
-            }
-        }
-
-        function generateCardNumbers() {
-            const numbers = new Set();
-            while (numbers.size < 15) {
-                numbers.add(Math.floor(Math.random() * 90) + 1);
-            }
-            return Array.from(numbers).sort((a, b) => a - b);
-        }
-
-        // ============================================
-        // SINCRONIZZAZIONE
-        // ============================================
-
-        function startSync() {
-            // Carica stato iniziale
-            loadServerState();
-            
-            // Avvia intervallo di sync
-            syncInterval = setInterval(() => {
-                syncWithServer();
-            }, CONFIG.SYNC_INTERVAL);
-            
-            // Aggiorna activity per l'utente corrente
-            if (user.loggedIn) {
-                if (user.role === 'admin') {
-                    serverState.admin.lastActivity = Date.now();
-                } else if (user.role === 'player') {
-                    const player = serverState.players.find(p => p.id === user.playerId);
-                    if (player) {
-                        player.lastActivity = Date.now();
-                    }
-                }
-                saveServerState();
-            }
-        }
-
-        function syncWithServer() {
-            // Carica stato aggiornato dal server
-            loadServerState();
-            
-            // Aggiorna UI se l'utente è loggato
-            if (user.loggedIn) {
-                // Aggiorna numeri estratti
-                updateGameUI();
-                
-                // Aggiorna cartella se giocatore
-                if (user.role === 'player') {
-                    const player = serverState.players.find(p => p.id === user.playerId);
-                    if (player && JSON.stringify(player.cardNumbers) !== JSON.stringify(user.cardNumbers)) {
-                        user.cardNumbers = player.cardNumbers;
-                        createTombolaGrid();
-                    }
-                }
-                
-                // Controlla vincitori
-                if (serverState.game.winner && !document.getElementById('winner-modal').style.display === 'flex') {
-                    announceWinner(serverState.game.winner);
-                }
-            }
-            
-            // Pulisci giocatori disconnessi (inattivi da più di 30 secondi)
-            const now = Date.now();
-            serverState.players = serverState.players.filter(p => 
-                p.connected && (now - p.lastActivity < 30000)
-            );
-            
-            updateConnectionStatus(true);
-        }
-
-        function updateConnectionStatus(connected) {
-            const icon = document.getElementById('connection-icon');
-            const text = document.getElementById('connection-text');
-            
-            if (connected) {
-                icon.className = 'fas fa-circle online';
-                text.textContent = `Online • ${serverState.players.filter(p => p.connected).length} giocatori`;
-            } else {
-                icon.className = 'fas fa-circle offline';
-                text.textContent = 'Offline';
-            }
-        }
-
-        // ============================================
-        // FUNZIONI AUSILIARIE
-        // ============================================
-
-        function showNotification(message, type = 'info') {
-            // Crea notifica
-            const notification = document.createElement('div');
-            notification.className = 'notification';
-            notification.textContent = message;
-            
-            // Colore in base al tipo
-            if (type === 'error') {
-                notification.style.background = 'var(--danger)';
-            } else if (type === 'success') {
-                notification.style.background = 'var(--success)';
-            } else if (type === 'warning') {
-                notification.style.background = 'var(--warning)';
-            }
-            
-            document.body.appendChild(notification);
-            
-            // Rimuovi dopo 3 secondi
-            setTimeout(() => {
-                if (notification.parentNode) {
-                    notification.parentNode.removeChild(notification);
-                }
-            }, 3000);
-        }
-
-        function showAdminLogin() {
-            document.getElementById('player-login').style.display = 'none';
-            document.getElementById('admin-login').style.display = 'block';
-        }
-
-        function hideAdminLogin() {
-            document.getElementById('admin-login').style.display = 'none';
-            document.getElementById('player-login').style.display = 'block';
-        }
-
-        function showCodeManager() {
-            updateCodesList();
-            document.getElementById('codes-modal').style.display = 'flex';
-        }
-
-        function closeModal(modalId) {
-            document.getElementById(modalId).style.display = 'none';
-        }
-
-        // ============================================
-        // INIZIALIZZAZIONE
-        // ============================================
-        
-        window.onload = function() {
-            initServer();
-            showLoginScreen();
-        };
-
-        // Pulisci intervalli quando la pagina viene chiusa
-        window.onbeforeunload = function() {
-            if (syncInterval) clearInterval(syncInterval);
-            if (autoExtractInterval) clearInterval(autoExtractInterval);
-            
-            // Segna come disconnesso
-            if (user.loggedIn) {
-                logout();
-            }
-        };
-    </script>
+    <script src="game.js"></script>
 </body>
 </html>
