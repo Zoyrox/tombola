@@ -1,13 +1,8 @@
 {
   "name": "tombola-python",
   "version": "1.0.0",
-  "description": "Tombola multiplayer in tempo reale",
-  "main": "server.js",
+  "description": "Tombola multiplayer sincronizzata",
   "scripts": {
-    "start": "node server.js"
-  },
-  "dependencies": {
-    "express": "^4.18.2",
-    "socket.io": "^4.7.2"
+    "start": "echo 'Static site - no server needed'"
   }
 }
