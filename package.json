@@ -1,0 +1,13 @@
+{
+  "name": "tombola-python",
+  "version": "1.0.0",
+  "description": "Tombola online con tema Python",
+  "main": "index.html",
+  "scripts": {
+    "build": "echo 'Build completato per Tombola Python'",
+    "start": "echo 'Static site - nessun server necessario'"
+  },
+  "keywords": ["tombola", "python", "game", "online"],
+  "author": "",
+  "license": "MIT"
+}
